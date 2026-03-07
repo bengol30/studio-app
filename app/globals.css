@@ -8,12 +8,8 @@
     --foreground: #EAEAEA;
   }
 
-  * {
-    @apply border-border-c;
-  }
-
   body {
-    @apply bg-bg-primary text-text-primary;
+    @apply bg-primary text-primary-text;
   }
 
   /* Scrollbar styling for dark theme */
