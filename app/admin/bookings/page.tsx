@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
+import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 import { createAdminClient } from '@/lib/supabase-admin';
+import { createClient } from '@/lib/supabase-server';
 
 interface BookingRow {
   id: string;
@@ -50,6 +52,10 @@ async function getBookings(status: string) {
 
 async function updateBookingStatus(formData: FormData) {
   'use server';
+  const authClient = await createClient();
+  const { data: { user } } = await authClient.auth.getUser();
+  if (!user) redirect('/admin/login');
+
   const id = formData.get('id') as string;
   const status = formData.get('status') as string;
   const supabase = createAdminClient();

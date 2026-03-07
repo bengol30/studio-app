@@ -2,12 +2,13 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase-admin';
 import { triggerWebhook } from '@/lib/make-webhooks';
 
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 type Params = { params: { token: string } };
 
 export async function GET(_request: NextRequest, { params }: Params) {
   const { token } = params;
 
-  if (!token || token.length < 10) {
+  if (!token || !UUID_REGEX.test(token)) {
     return NextResponse.json({ error: 'Invalid token' }, { status: 400 });
   }
 
@@ -38,7 +39,7 @@ export async function GET(_request: NextRequest, { params }: Params) {
 export async function PATCH(request: NextRequest, { params }: Params) {
   const { token } = params;
 
-  if (!token || token.length < 10) {
+  if (!token || !UUID_REGEX.test(token)) {
     return NextResponse.json({ error: 'Invalid token' }, { status: 400 });
   }
 
