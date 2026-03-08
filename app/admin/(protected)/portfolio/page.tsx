@@ -15,7 +15,9 @@ export interface PortfolioItem {
     year: string;
     emoji: string;
     color: string;
-    image_url?: string;
+    image_mode?: 'upload' | 'youtube'; // which mode is active
+    image_url?: string;                 // uploaded image URL
+    youtube_url?: string;               // YouTube video URL (thumbnail extracted automatically)
 }
 
 export interface PortfolioSettings {

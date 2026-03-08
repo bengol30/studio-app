@@ -43,6 +43,26 @@ const SERVICES_GALLERY = [
     { icon: '🎸', title: "ג'אמים ואירועים", desc: 'מפגשים מוזיקליים וכיתות אמן' },
 ];
 
+/** Extract YouTube video ID from any YouTube URL format */
+function extractYouTubeId(url: string): string | null {
+    const patterns = [
+        /youtube\.com\/watch\?v=([^&\s]+)/,
+        /youtu\.be\/([^?\s]+)/,
+        /youtube\.com\/embed\/([^?\s]+)/,
+        /youtube\.com\/shorts\/([^?\s]+)/,
+    ];
+    for (const p of patterns) {
+        const m = url.match(p);
+        if (m) return m[1];
+    }
+    return null;
+}
+
+/** Get high-quality YouTube thumbnail URL */
+function getYouTubeThumbnail(videoId: string): string {
+    return `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
+}
+
 export default async function AboutPage() {
     const settings = await getPortfolioSettings();
 
@@ -92,29 +112,50 @@ export default async function AboutPage() {
                     <section>
                         <h2 className="text-xl font-bold text-primary-text mb-6 text-right">הפקות בולטות</h2>
                         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                            {settings.items.map((item: PortfolioItem) => (
-                                <div
-                                    key={item.id}
-                                    className={`relative rounded-2xl overflow-hidden border border-white/10 bg-gradient-to-br ${item.color} h-40 flex flex-col justify-end p-4 hover:border-white/20 transition-colors`}
-                                >
-                                    {item.image_url ? (
-                                        <img src={item.image_url} alt={item.title} className="absolute inset-0 w-full h-full object-cover" />
-                                    ) : (
-                                        <div className="absolute top-4 left-4">
-                                            <span className="text-3xl opacity-40">{item.emoji}</span>
+                            {settings.items.map((item: PortfolioItem) => {
+                                const ytId = item.youtube_url ? extractYouTubeId(item.youtube_url) : null;
+                                const coverSrc = item.image_mode === 'youtube'
+                                    ? (ytId ? getYouTubeThumbnail(ytId) : null)
+                                    : item.image_url;
+
+                                return (
+                                    <div
+                                        key={item.id}
+                                        className={`relative rounded-2xl overflow-hidden border border-white/10 bg-gradient-to-br ${item.color} h-40 flex flex-col justify-end p-4 hover:border-white/20 transition-colors`}
+                                    >
+                                        {coverSrc ? (
+                                            <img src={coverSrc} alt={item.title} className="absolute inset-0 w-full h-full object-cover" />
+                                        ) : (
+                                            <div className="absolute top-4 left-4">
+                                                <span className="text-3xl opacity-40">{item.emoji}</span>
+                                            </div>
+                                        )}
+                                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent pointer-events-none" />
+
+                                        <div className="absolute top-3 right-3 z-10">
+                                            <span className="text-xs px-2 py-0.5 rounded-full bg-black/50 border border-white/10 text-white/90 backdrop-blur-sm">
+                                                {item.type}
+                                            </span>
                                         </div>
-                                    )}
-                                    <div className="absolute top-3 right-3">
-                                        <span className="text-xs px-2 py-0.5 rounded-full bg-black/30 text-white/70 backdrop-blur-sm">
-                                            {item.type}
-                                        </span>
+                                        <div className="text-right relative z-10">
+                                            <p className="text-sm font-semibold text-white leading-tight drop-shadow-md">{item.title}</p>
+                                            <p className="text-xs text-white/70 mt-0.5 drop-shadow-md">{item.year}</p>
+                                        </div>
+
+                                        {item.image_mode === 'youtube' && item.youtube_url && (
+                                            <a
+                                                href={item.youtube_url}
+                                                target="_blank"
+                                                rel="noreferrer"
+                                                className="absolute inset-0 z-20"
+                                                title={`צפה בסרטון: ${item.title}`}
+                                            >
+                                                {/* Hidden link covering the whole box, allowing users to click to watch on YouTube */}
+                                            </a>
+                                        )}
                                     </div>
-                                    <div className="text-right relative z-10">
-                                        <p className="text-sm font-semibold text-white leading-tight drop-shadow">{item.title}</p>
-                                        <p className="text-xs text-white/50 mt-0.5">{item.year}</p>
-                                    </div>
-                                </div>
-                            ))}
+                                );
+                            })}
                         </div>
                     </section>
                 )}
