@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { createAdminClient } from '@/lib/supabase-admin';
 import { createClient } from '@/lib/supabase-server';
 import type { EventType, EventStatus } from '@/types';
+import CreateEventForm from '@/components/admin/CreateEventForm';
 
 export const metadata: Metadata = {
   title: 'אירועים | ניהול',
@@ -146,109 +147,7 @@ export default async function EventsPage({
             <a href="/admin/events" className="text-xs text-muted hover:text-accent">ביטול</a>
             <h2 className="font-semibold text-primary-text">אירוע חדש</h2>
           </div>
-          <form action={createEvent} className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs text-muted mb-1 text-right">שם האירוע *</label>
-                <input
-                  type="text"
-                  name="title"
-                  required
-                  className="w-full bg-primary border border-white/10 rounded-lg px-3 py-2 text-primary-text text-sm focus:outline-none focus:border-accent"
-                />
-              </div>
-              <div>
-                <label className="block text-xs text-muted mb-1 text-right">סוג אירוע *</label>
-                <select
-                  name="event_type"
-                  required
-                  className="w-full bg-primary border border-white/10 rounded-lg px-3 py-2 text-primary-text text-sm focus:outline-none focus:border-accent"
-                >
-                  {Object.entries(EVENT_TYPE_LABELS).map(([k, v]) => (
-                    <option key={k} value={k}>{v}</option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label className="block text-xs text-muted mb-1 text-right">תאריך *</label>
-                <input
-                  type="date"
-                  name="event_date"
-                  required
-                  className="w-full bg-primary border border-white/10 rounded-lg px-3 py-2 text-primary-text text-sm focus:outline-none focus:border-accent"
-                />
-              </div>
-              <div>
-                <label className="block text-xs text-muted mb-1 text-right">שעה *</label>
-                <input
-                  type="time"
-                  name="event_time"
-                  required
-                  className="w-full bg-primary border border-white/10 rounded-lg px-3 py-2 text-primary-text text-sm focus:outline-none focus:border-accent"
-                />
-              </div>
-              <div>
-                <label className="block text-xs text-muted mb-1 text-right">מיקום</label>
-                <input
-                  type="text"
-                  name="location"
-                  className="w-full bg-primary border border-white/10 rounded-lg px-3 py-2 text-primary-text text-sm focus:outline-none focus:border-accent"
-                />
-              </div>
-              <div>
-                <label className="block text-xs text-muted mb-1 text-right">מחיר (₪)</label>
-                <input
-                  type="number"
-                  name="price"
-                  defaultValue="0"
-                  min="0"
-                  step="0.01"
-                  className="w-full bg-primary border border-white/10 rounded-lg px-3 py-2 text-primary-text text-sm focus:outline-none focus:border-accent"
-                />
-              </div>
-              <div>
-                <label className="block text-xs text-muted mb-1 text-right">מקסימום משתתפים</label>
-                <input
-                  type="number"
-                  name="max_attendees"
-                  min="1"
-                  className="w-full bg-primary border border-white/10 rounded-lg px-3 py-2 text-primary-text text-sm focus:outline-none focus:border-accent"
-                  placeholder="ללא הגבלה"
-                />
-              </div>
-              <div>
-                <label className="block text-xs text-muted mb-1 text-right">מארח</label>
-                <input
-                  type="text"
-                  name="host_name"
-                  className="w-full bg-primary border border-white/10 rounded-lg px-3 py-2 text-primary-text text-sm focus:outline-none focus:border-accent"
-                />
-              </div>
-            </div>
-            <div>
-              <label className="block text-xs text-muted mb-1 text-right">תמונה (URL)</label>
-              <input
-                type="url"
-                name="image_url"
-                placeholder="https://... (אופציונלי)"
-                className="w-full bg-primary border border-white/10 rounded-lg px-3 py-2 text-primary-text text-sm focus:outline-none focus:border-accent"
-              />
-            </div>
-            <div>
-              <label className="block text-xs text-muted mb-1 text-right">תיאור</label>
-              <textarea
-                name="description"
-                rows={3}
-                className="w-full bg-primary border border-white/10 rounded-lg px-3 py-2 text-primary-text text-sm focus:outline-none focus:border-accent resize-none"
-              />
-            </div>
-            <button
-              type="submit"
-              className="w-full bg-accent hover:bg-accent/90 text-white font-semibold py-2.5 rounded-xl transition-colors"
-            >
-              צור אירוע
-            </button>
-          </form>
+          <CreateEventForm createEvent={createEvent} />
         </div>
       )}
 
