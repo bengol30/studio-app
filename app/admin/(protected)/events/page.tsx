@@ -5,6 +5,7 @@ import { createAdminClient } from '@/lib/supabase-admin';
 import { createClient } from '@/lib/supabase-server';
 import type { EventType, EventStatus } from '@/types';
 import CreateEventForm from '@/components/admin/CreateEventForm';
+import EditEventForm from '@/components/admin/EditEventForm';
 
 export const metadata: Metadata = {
   title: 'אירועים | ניהול',
@@ -81,6 +82,32 @@ async function createEvent(formData: FormData) {
   redirect('/admin/events');
 }
 
+async function updateEvent(formData: FormData) {
+  'use server';
+  const authClient = await createClient();
+  const { data: { user } } = await authClient.auth.getUser();
+  if (!user) redirect('/admin/login');
+
+  const id = formData.get('id') as string;
+  const maxAttendeesStr = formData.get('max_attendees') as string;
+  const supabase = createAdminClient();
+  await supabase.from('events').update({
+    title: formData.get('title') as string,
+    description: formData.get('description') as string || null,
+    event_type: formData.get('event_type') as EventType,
+    event_date: formData.get('event_date') as string,
+    event_time: formData.get('event_time') as string,
+    location: formData.get('location') as string || null,
+    price: parseFloat(formData.get('price') as string) || 0,
+    max_attendees: maxAttendeesStr ? parseInt(maxAttendeesStr) : null,
+    host_name: formData.get('host_name') as string || null,
+    image_url: formData.get('image_url') as string || null,
+  }).eq('id', id);
+  revalidatePath('/admin/events');
+  revalidatePath('/events');
+  redirect('/admin/events');
+}
+
 async function updateEventStatus(formData: FormData) {
   'use server';
   const authClient = await createClient();
@@ -111,11 +138,12 @@ async function deleteEvent(formData: FormData) {
 export default async function EventsPage({
   searchParams,
 }: {
-  searchParams: { status?: string; view?: string; event?: string };
+  searchParams: { status?: string; view?: string; event?: string; edit?: string };
 }) {
   const activeStatus = searchParams.status ?? 'open';
   const showCreate = searchParams.view === 'new';
   const viewEventId = searchParams.event;
+  const editEventId = searchParams.edit;
 
   const events = await getEvents(activeStatus);
 
@@ -125,6 +153,8 @@ export default async function EventsPage({
     registrations = await getRegistrations(viewEventId);
     viewedEvent = events.find(e => e.id === viewEventId);
   }
+
+  const editedEvent = editEventId ? events.find(e => e.id === editEventId) : null;
 
   return (
     <div className="p-6" dir="rtl">
@@ -149,6 +179,17 @@ export default async function EventsPage({
             <h2 className="font-semibold text-primary-text">אירוע חדש</h2>
           </div>
           <CreateEventForm createEvent={createEvent} />
+        </div>
+      )}
+
+      {/* Edit form */}
+      {editedEvent && (
+        <div className="bg-card rounded-xl border border-accent/20 p-6 mb-6">
+          <div className="flex justify-between items-center mb-4">
+            <a href={`/admin/events?status=${activeStatus}`} className="text-xs text-muted hover:text-accent">ביטול</a>
+            <h2 className="font-semibold text-primary-text">עריכת אירוע – {editedEvent.title}</h2>
+          </div>
+          <EditEventForm event={editedEvent} updateEvent={updateEvent} />
         </div>
       )}
 
@@ -207,10 +248,12 @@ export default async function EventsPage({
           {events.map(event => (
             <div
               key={event.id}
-              className="bg-card rounded-xl border border-white/10 p-5"
+              className={`bg-card rounded-xl border p-5 transition-colors ${
+                editEventId === event.id ? 'border-accent/30' : 'border-white/10'
+              }`}
             >
               <div className="flex justify-between items-start mb-3">
-                <div className="flex gap-2">
+                <div className="flex gap-2 flex-wrap">
                   {activeStatus === 'open' && (
                     <form action={updateEventStatus}>
                       <input type="hidden" name="id" value={event.id} />
@@ -235,6 +278,12 @@ export default async function EventsPage({
                       </button>
                     </form>
                   )}
+                  <a
+                    href={`/admin/events?status=${activeStatus}&edit=${event.id}`}
+                    className="px-3 py-1.5 bg-white/5 text-muted rounded-lg text-sm hover:text-primary-text transition-colors"
+                  >
+                    ערוך
+                  </a>
                   <a
                     href={`/admin/events?status=${activeStatus}&event=${event.id}`}
                     className="px-3 py-1.5 bg-white/5 text-muted rounded-lg text-sm hover:text-primary-text transition-colors"
@@ -282,7 +331,7 @@ export default async function EventsPage({
               <div className="mt-3 flex justify-start">
                 <form action={deleteEvent}>
                   <input type="hidden" name="id" value={event.id} />
-                  <button type="submit" className="text-xs text-muted hover:text-accent transition-colors">
+                  <button type="submit" className="text-xs text-muted hover:text-red-400 transition-colors">
                     מחק
                   </button>
                 </form>
