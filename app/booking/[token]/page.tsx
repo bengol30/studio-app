@@ -2,6 +2,9 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import CancelButton from './CancelButton';
+import { createAdminClient } from '@/lib/supabase-admin';
+
+export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
   title: 'פרטי הזמנה | Bengo Productions',
@@ -22,10 +25,13 @@ function formatDate(dateStr: string) {
 }
 
 async function getBooking(token: string) {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
-  const res = await fetch(`${baseUrl}/api/bookings/token/${token}`, { cache: 'no-store' });
-  if (!res.ok) return null;
-  return res.json();
+  const supabase = createAdminClient();
+  const { data } = await supabase
+    .from('bookings')
+    .select('*, services(name), packages(name)')
+    .eq('booking_token', token)
+    .single();
+  return data ?? null;
 }
 
 export default async function BookingPage({ params }: { params: { token: string } }) {

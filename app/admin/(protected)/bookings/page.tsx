@@ -61,6 +61,9 @@ async function updateBookingStatus(formData: FormData) {
   const supabase = createAdminClient();
   await supabase.from('bookings').update({ status }).eq('id', id);
   revalidatePath('/admin/bookings');
+  revalidatePath('/admin/calendar');
+  revalidatePath('/admin/dashboard');
+  revalidatePath('/booking', 'layout');
 }
 
 export default async function BookingsPage({

@@ -28,6 +28,7 @@ async function getSettings() {
     .select('key, value')
     .in('key', ['opening_hours', 'buffer_minutes', 'cancellation_hours', 'terms_of_service', 'studio_info']);
 
+
   const map: Record<string, unknown> = {};
   (data ?? []).forEach(row => { map[row.key] = row.value; });
   return map;
@@ -65,7 +66,15 @@ async function saveSettings(formData: FormData) {
     value: formData.get('terms_of_service') as string,
   });
 
+  const existingInfo = await supabase.from('settings').select('value').eq('key', 'studio_info').single();
+  const currentInfo = (existingInfo.data?.value as Record<string, string>) ?? {};
+  await supabase.from('settings').upsert({
+    key: 'studio_info',
+    value: { ...currentInfo, whatsapp: formData.get('whatsapp') as string },
+  });
+
   revalidatePath('/admin/settings');
+  revalidatePath('/book');
 }
 
 export default async function SettingsPage() {
@@ -74,6 +83,8 @@ export default async function SettingsPage() {
   const bufferMinutes = (settings.buffer_minutes as number) ?? 10;
   const cancellationHours = (settings.cancellation_hours as number) ?? 48;
   const terms = (settings.terms_of_service as string) ?? '';
+  const studioInfo = (settings.studio_info as Record<string, string>) ?? {};
+  const whatsapp = studioInfo.whatsapp ?? '';
 
   return (
     <div className="p-6 max-w-2xl" dir="rtl">
@@ -148,6 +159,25 @@ export default async function SettingsPage() {
                 max={168}
                 className="bg-primary border border-white/10 rounded-lg px-3 py-1.5 text-primary-text w-20 text-center focus:outline-none focus:border-accent"
               />
+            </div>
+          </div>
+        </div>
+
+        {/* WhatsApp */}
+        <div className="bg-card rounded-xl border border-white/10 p-5">
+          <h2 className="font-semibold text-primary-text mb-4">פרטי קשר</h2>
+          <div className="flex items-center justify-between">
+            <input
+              type="tel"
+              name="whatsapp"
+              defaultValue={whatsapp}
+              placeholder="972501234567"
+              className="bg-primary border border-white/10 rounded-lg px-3 py-1.5 text-primary-text text-sm focus:outline-none focus:border-accent w-52 text-left"
+              dir="ltr"
+            />
+            <div>
+              <label className="text-sm text-primary-text">מספר WhatsApp</label>
+              <p className="text-xs text-muted">כולל קידומת מדינה, ללא +. לדוגמה: 972501234567</p>
             </div>
           </div>
         </div>

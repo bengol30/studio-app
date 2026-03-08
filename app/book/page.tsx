@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import BookingWizard from '@/components/booking/BookingWizard';
 import type { Service } from '@/types';
+import { createAdminClient } from '@/lib/supabase-admin';
 
 export const metadata: Metadata = {
   title: 'הזמנת סטודיו | Bengo Productions',
@@ -9,10 +10,22 @@ export const metadata: Metadata = {
 
 async function getServices(): Promise<Service[]> {
   try {
-    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
-    const res = await fetch(`${baseUrl}/api/services`, { cache: 'no-store' });
-    if (!res.ok) return [];
-    return res.json();
+    const supabase = createAdminClient();
+    const { data: services } = await supabase
+      .from('services')
+      .select('*, packages(*), service_fields(*)')
+      .eq('is_active', true)
+      .eq('is_deleted', false)
+      .order('name');
+
+    return (services ?? []).map(service => ({
+      ...service,
+      packages: (service.packages ?? [])
+        .filter((p: { is_active: boolean; is_deleted: boolean }) => p.is_active && !p.is_deleted)
+        .sort((a: { price: number }, b: { price: number }) => a.price - b.price),
+      service_fields: (service.service_fields ?? [])
+        .sort((a: { display_order: number }, b: { display_order: number }) => a.display_order - b.display_order),
+    }));
   } catch {
     return [];
   }

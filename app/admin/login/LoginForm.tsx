@@ -67,6 +67,13 @@ export default function LoginForm() {
       >
         {loading ? 'מתחבר...' : 'כניסה'}
       </button>
+
+      <p className="text-center text-sm text-muted">
+        אין לך חשבון?{' '}
+        <a href="/admin/register" className="text-accent hover:underline">
+          הרשמה
+        </a>
+      </p>
     </form>
   );
 }

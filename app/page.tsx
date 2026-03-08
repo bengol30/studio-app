@@ -1,35 +1,90 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import type { Service } from '@/types';
+import { createAdminClient } from '@/lib/supabase-admin';
+import ClientHeader from '@/components/ClientHeader';
+import WhatsAppButton from '@/components/WhatsAppButton';
 
 export const metadata: Metadata = {
   title: 'Bengo Productions | אולפן הקלטות קריית שמונה',
   description: 'אולפן הקלטות מקצועי בקריית שמונה. הזמן סטודיו, הקלטת מוזיקה, פודקאסט ועוד.',
 };
 
+const EVENT_TYPE_ICONS: Record<string, string> = {
+  jam: '🎸', listening: '🎧', workshop: '🎛️', performance: '🎤', podcast: '🎙️', other: '🎵',
+};
+
+const EVENT_TYPE_GRADIENTS: Record<string, string> = {
+  jam: 'from-purple-900/60 to-pink-900/40',
+  listening: 'from-emerald-900/60 to-teal-900/40',
+  workshop: 'from-blue-900/60 to-cyan-900/40',
+  performance: 'from-orange-900/60 to-red-900/40',
+  podcast: 'from-gray-800/60 to-slate-900/40',
+  other: 'from-accent/20 to-accent/5',
+};
+
+async function getUpcomingEvents() {
+  try {
+    const supabase = createAdminClient();
+    const today = new Date().toISOString().slice(0, 10);
+    const { data } = await supabase
+      .from('events')
+      .select('*')
+      .eq('is_deleted', false)
+      .eq('status', 'open')
+      .gte('event_date', today)
+      .order('event_date', { ascending: true })
+      .limit(3);
+    return data ?? [];
+  } catch {
+    return [];
+  }
+}
+
+async function getWhatsApp(): Promise<string> {
+  try {
+    const supabase = createAdminClient();
+    const { data } = await supabase.from('settings').select('value').eq('key', 'studio_info').single();
+    return (data?.value as { whatsapp?: string })?.whatsapp ?? '';
+  } catch {
+    return '';
+  }
+}
+
+const DAYS_HE = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת'];
+function formatDateShort(dateStr: string) {
+  const d = new Date(`${dateStr}T00:00:00`);
+  return `${DAYS_HE[d.getDay()]}, ${d.toLocaleDateString('he-IL')}`;
+}
+
 async function getServices(): Promise<Service[]> {
   try {
-    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
-    const res = await fetch(`${baseUrl}/api/services`, { next: { revalidate: 60 } });
-    if (!res.ok) return [];
-    return res.json();
+    const supabase = createAdminClient();
+    const { data: services } = await supabase
+      .from('services')
+      .select('*, packages(*)')
+      .eq('is_active', true)
+      .eq('is_deleted', false)
+      .order('name');
+    return (services ?? []).map(service => ({
+      ...service,
+      packages: (service.packages ?? []).filter((p: { is_active: boolean; is_deleted: boolean }) => p.is_active && !p.is_deleted),
+    }));
   } catch {
     return [];
   }
 }
 
 export default async function HomePage() {
-  const services = await getServices();
+  const [services, upcomingEvents, whatsapp] = await Promise.all([
+    getServices(),
+    getUpcomingEvents(),
+    getWhatsApp(),
+  ]);
 
   return (
     <main className="min-h-screen bg-primary" dir="rtl">
-      {/* Nav */}
-      <header className="border-b border-white/5 px-6 py-4 flex justify-between items-center">
-        <Link href="/admin/login" className="text-xs text-muted hover:text-primary-text transition-colors">
-          כניסת מנהל
-        </Link>
-        <span className="text-primary-text font-bold tracking-wide">Bengo Productions</span>
-      </header>
+      <ClientHeader />
 
       {/* Hero */}
       <section className="relative py-20 md:py-32 px-4 text-center overflow-hidden">
@@ -57,14 +112,67 @@ export default async function HomePage() {
               הזמן עכשיו
             </Link>
             <Link
-              href="#services"
+              href="/events"
               className="border border-white/15 hover:border-white/30 text-primary-text px-8 py-3.5 rounded-xl transition-colors"
             >
-              השירותים שלנו
+              אירועים
             </Link>
           </div>
         </div>
       </section>
+
+      {/* Upcoming Events */}
+      {upcomingEvents.length > 0 && (
+        <section className="py-16 px-4 border-t border-white/5">
+          <div className="max-w-4xl mx-auto">
+            <div className="flex justify-between items-end mb-8">
+              <Link href="/events" className="text-sm text-accent hover:underline">
+                כל האירועים ←
+              </Link>
+              <div className="text-right">
+                <h2 className="text-2xl font-bold text-primary-text">אירועים קרובים</h2>
+                <p className="text-muted text-sm mt-1">ג&#39;אמים, סדנאות, הופעות ועוד</p>
+              </div>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+              {upcomingEvents.map(event => {
+                const gradient = EVENT_TYPE_GRADIENTS[event.event_type] ?? EVENT_TYPE_GRADIENTS.other;
+                const icon = EVENT_TYPE_ICONS[event.event_type] ?? '🎵';
+                return (
+                  <Link
+                    key={event.id}
+                    href={`/events/${event.id}`}
+                    className="group bg-card border border-white/10 rounded-2xl overflow-hidden hover:border-white/25 transition-all hover:-translate-y-0.5"
+                  >
+                    <div className={`h-36 relative bg-gradient-to-br ${gradient} flex items-center justify-center overflow-hidden`}>
+                      {event.image_url ? (
+                        <img src={event.image_url} alt={event.title} className="w-full h-full object-cover" />
+                      ) : (
+                        <span className="text-5xl opacity-60">{icon}</span>
+                      )}
+                      {event.status === 'full' && (
+                        <span className="absolute top-3 left-3 text-xs px-2 py-0.5 rounded-full bg-black/60 text-accent font-medium">מלא</span>
+                      )}
+                    </div>
+                    <div className="p-4">
+                      <p className="font-semibold text-primary-text text-right mb-1 line-clamp-1">{event.title}</p>
+                      <p className="text-xs text-muted text-right mb-3">
+                        {formatDateShort(event.event_date)} · {event.event_time?.slice(0, 5)}
+                      </p>
+                      <div className="flex justify-between items-center">
+                        <span className="text-xs text-muted group-hover:text-accent transition-colors">פרטים ←</span>
+                        <span className="text-accent text-sm font-semibold">
+                          {event.price === 0 ? 'חינם' : `₪${event.price}`}
+                        </span>
+                      </div>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Services */}
       <section id="services" className="py-16 px-4">
@@ -137,6 +245,8 @@ export default async function HomePage() {
           © {new Date().getFullYear()} Bengo Productions · קריית שמונה
         </p>
       </footer>
+
+      <WhatsAppButton phone={whatsapp} />
     </main>
   );
 }
