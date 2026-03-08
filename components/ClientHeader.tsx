@@ -13,6 +13,12 @@ export default function ClientHeader() {
 
         <nav className="flex items-center gap-1 md:gap-2">
           <Link
+            href="/about"
+            className="text-sm text-muted hover:text-primary-text transition-colors px-3 py-1.5 rounded-lg hover:bg-white/5"
+          >
+            תיק עבודות
+          </Link>
+          <Link
             href="/events"
             className="text-sm text-muted hover:text-primary-text transition-colors px-3 py-1.5 rounded-lg hover:bg-white/5"
           >
