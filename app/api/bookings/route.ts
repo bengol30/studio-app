@@ -103,7 +103,7 @@ export async function POST(request: NextRequest) {
         end_time,
         client_name: data.client_name,
         client_phone: data.client_phone,
-        answers: data.answers,
+        dynamic_answers: data.answers,
         files_url: data.files_url ?? null,
         status: 'pending',
       })

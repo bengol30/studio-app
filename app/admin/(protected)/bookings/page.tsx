@@ -12,7 +12,7 @@ interface BookingRow {
   start_time: string;
   end_time: string;
   status: string;
-  answers: Record<string, string> | null;
+  dynamic_answers: Record<string, string> | null;
   files_url: string | null;
   services: { name: string } | null;
   packages: { name: string; duration_minutes: number; price: number } | null;
@@ -179,7 +179,7 @@ export default async function BookingsPage({
               </div>
 
               {(() => {
-                const answers = booking.answers as Record<string, string> | null;
+                const answers = booking.dynamic_answers as Record<string, string> | null;
                 if (!answers || Object.keys(answers).length === 0) return null;
                 return (
                   <div className="mt-3 text-xs text-muted">
