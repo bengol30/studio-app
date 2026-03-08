@@ -43,30 +43,34 @@ export default async function DashboardPage() {
     { data: lastMonthData },
     { data: allConfirmed },
   ] = await Promise.all([
-    supabase.from('bookings').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
-    supabase.from('bookings').select('*', { count: 'exact', head: true }).eq('booking_date', todayStr),
+    supabase.from('bookings').select('*', { count: 'exact', head: true }).eq('status', 'pending').eq('is_deleted', false),
+    supabase.from('bookings').select('*', { count: 'exact', head: true }).eq('booking_date', todayStr).eq('is_deleted', false),
     supabase.from('clients').select('*', { count: 'exact', head: true }),
     supabase.from('events').select('*', { count: 'exact', head: true }).eq('status', 'open').gte('event_date', todayStr),
     supabase
       .from('bookings')
       .select('id, booking_date, start_time, end_time, client_name, client_phone, status, services(name), packages(name)')
+      .eq('is_deleted', false)
       .order('created_at', { ascending: false })
       .limit(6),
     supabase
       .from('bookings')
       .select('id, packages(price)')
       .in('status', ['confirmed'])
+      .eq('is_deleted', false)
       .gte('booking_date', monthStart),
     supabase
       .from('bookings')
       .select('id, packages(price)')
       .in('status', ['confirmed'])
+      .eq('is_deleted', false)
       .gte('booking_date', lastMonthStart)
       .lt('booking_date', monthStart),
     supabase
       .from('bookings')
       .select('start_time, booking_date, services(name)')
       .in('status', ['confirmed'])
+      .eq('is_deleted', false)
   ]);
 
   // ─── Insights calculations ─────────────────────────────────────────────────

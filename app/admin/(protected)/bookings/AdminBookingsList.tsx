@@ -50,9 +50,11 @@ export default function AdminBookingsList({ bookings, activeStatus }: Props) {
         setSelectedIds(next);
     };
 
-    const handleBulkAction = async (newStatus: string) => {
-        if (selectedIds.size === 0) return;
-        if (!confirm(`האם מעדכן סטטוס ל-${newStatus} עבור ${selectedIds.size} רשומות?`)) return;
+    const handleBulkAction = async (newStatus: string, specificIds?: string[]) => {
+        const idsToUpdate = specificIds || Array.from(selectedIds);
+        if (idsToUpdate.length === 0) return;
+
+        if (!specificIds && !confirm(`האם מעדכן סטטוס ל-${newStatus} עבור ${idsToUpdate.length} רשומות?`)) return;
 
         setIsProcessing(true);
         try {
@@ -60,7 +62,7 @@ export default function AdminBookingsList({ bookings, activeStatus }: Props) {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    ids: Array.from(selectedIds),
+                    ids: idsToUpdate,
                     status: newStatus
                 }),
             });
@@ -195,17 +197,16 @@ export default function AdminBookingsList({ bookings, activeStatus }: Props) {
                         <div className="flex-1">
                             <div className="flex justify-between items-start mb-3">
                                 <div className="flex gap-2">
-                                    {/* We keep individual buttons for convenience */}
                                     {activeStatus === 'pending' && !hasSelection && (
                                         <>
                                             <button
-                                                onClick={() => { setSelectedIds(new Set([booking.id])); setTimeout(() => handleBulkAction('confirmed'), 100); }}
+                                                onClick={() => handleBulkAction('confirmed', [booking.id])}
                                                 className="px-3 py-1.5 bg-green-500/20 text-green-400 rounded-lg text-sm hover:bg-green-500/30 transition-colors"
                                             >
                                                 אשר
                                             </button>
                                             <button
-                                                onClick={() => { setSelectedIds(new Set([booking.id])); setTimeout(() => handleBulkAction('rejected'), 100); }}
+                                                onClick={() => handleBulkAction('rejected', [booking.id])}
                                                 className="px-3 py-1.5 bg-accent/20 text-accent rounded-lg text-sm hover:bg-accent/30 transition-colors"
                                             >
                                                 דחה
@@ -214,7 +215,7 @@ export default function AdminBookingsList({ bookings, activeStatus }: Props) {
                                     )}
                                     {activeStatus === 'confirmed' && !hasSelection && (
                                         <button
-                                            onClick={() => { setSelectedIds(new Set([booking.id])); setTimeout(() => handleBulkAction('cancelled'), 100); }}
+                                            onClick={() => handleBulkAction('cancelled', [booking.id])}
                                             className="px-3 py-1.5 border border-white/10 text-muted rounded-lg text-sm hover:text-accent transition-colors"
                                         >
                                             בטל
