@@ -8,7 +8,8 @@ type WebhookKey =
   | 'booking_confirmed'
   | 'booking_rejected'
   | 'booking_cancelled'
-  | 'event_registered';
+  | 'event_registered'
+  | 'waitlist_registered';
 
 export async function triggerWebhook(
   key: WebhookKey,

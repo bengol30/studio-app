@@ -2,6 +2,8 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import CancelButton from './CancelButton';
+import AddToCalendar from '@/components/booking/AddToCalendar';
+import ReBookButton from '@/components/booking/ReBookButton';
 import { createAdminClient } from '@/lib/supabase-admin';
 
 export const dynamic = 'force-dynamic';
@@ -29,7 +31,7 @@ async function getBooking(token: string) {
   const { data } = await supabase
     .from('bookings')
     .select('*, services(name), packages(name)')
-    .eq('booking_token', token)
+    .eq('token', token)
     .single();
   return data ?? null;
 }
@@ -52,12 +54,26 @@ export default async function BookingPage({ params }: { params: { token: string 
         </div>
 
         <div className="bg-card rounded-2xl border border-white/10 overflow-hidden">
-          <div className="p-6 border-b border-white/10">
-            <div className="flex justify-between items-start">
-              <span className={`text-sm font-medium px-3 py-1 rounded-full bg-white/5 ${status.color}`}>
+          <div className="p-6 border-b border-white/10 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div className="flex flex-col gap-2">
+              <span className={`w-fit text-sm font-medium px-3 py-1 rounded-full bg-white/5 ${status.color}`}>
                 {status.label}
               </span>
               <h1 className="text-xl font-bold text-primary-text">פרטי הזמנה</h1>
+            </div>
+
+            <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto mt-4 sm:mt-0">
+              <ReBookButton booking={{ service_id: booking.service_id, client_name: booking.client_name, client_phone: booking.client_phone }} />
+              <AddToCalendar
+                booking={{
+                  title: `${(booking.services as { name: string })?.name ?? 'הזמנה'} - Bengo Productions`,
+                  date: booking.booking_date,
+                  startTime: booking.start_time,
+                  endTime: booking.end_time,
+                  description: `פרטי הזמנה מלאים: ${process.env.NEXT_PUBLIC_SITE_URL}/booking/${params.token}`,
+                  location: 'האולפן של בנגו, קריית שמונה', // Change this to actual location if needed
+                }}
+              />
             </div>
           </div>
 

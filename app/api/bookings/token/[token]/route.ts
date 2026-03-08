@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase-admin';
-import { triggerWebhook } from '@/lib/make-webhooks';
+import { sendGenericWhatsAppMessage } from '@/lib/whatsapp';
 
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 type Params = { params: { token: string } };
@@ -90,12 +90,15 @@ export async function PATCH(request: NextRequest, { params }: Params) {
       return NextResponse.json({ error: 'Failed to cancel booking' }, { status: 500 });
     }
 
-    // 4. Trigger webhook (non-blocking)
-    triggerWebhook('booking_cancelled', {
-      client_name: booking.client_name,
-      client_phone: booking.client_phone,
-      booking_date: booking.booking_date,
-    }).catch(() => {});
+    // 4. Confirm cancellation to client via WhatsApp (non-blocking)
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? '';
+    sendGenericWhatsAppMessage(
+      booking.client_name,
+      booking.client_phone,
+      'booking_cancelled_by_client',
+      `שלום ${booking.client_name}, ביטול ההזמנה לתאריך ${booking.booking_date} בוצע בהצלחה.
+אם תירצה להזמין מחדש: ${siteUrl}/book`
+    ).catch(() => { });
 
     return NextResponse.json({ success: true });
   } catch {

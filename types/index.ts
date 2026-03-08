@@ -84,6 +84,7 @@ export interface Client {
   phone: string;
   notes: string | null;
   payment_status: PaymentStatus | null;
+  tags: string[] | null;
   is_deleted: boolean;
   created_at: string;
   updated_at: string;

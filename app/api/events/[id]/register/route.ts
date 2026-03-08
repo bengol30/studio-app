@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase-admin';
-import { triggerWebhook } from '@/lib/make-webhooks';
+import { sendGenericWhatsAppMessage } from '@/lib/whatsapp';
 
 export async function POST(
   request: NextRequest,
@@ -69,14 +69,14 @@ export async function POST(
       await supabase.from('events').update({ status: 'full' }).eq('id', params.id);
     }
 
-    triggerWebhook('event_registered', {
-      event_id: params.id,
-      event_title: event.title,
-      event_date: event.event_date,
-      event_time: event.event_time,
+    // Confirm registration to client via WhatsApp
+    sendGenericWhatsAppMessage(
       client_name,
       client_phone,
-    }).catch(() => {});
+      'event_registered',
+      `שלום ${client_name}! נרשמת בהצלחה לאירוע "${event.title}" 🎉
+תאריך: ${event.event_date} | שעה: ${event.event_time}`
+    ).catch(() => { });
 
     return NextResponse.json({ success: true });
   } catch {

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { createAdminClient } from '@/lib/supabase-admin';
-import { triggerWebhook } from '@/lib/make-webhooks';
+import { sendGenericWhatsAppMessage } from '@/lib/whatsapp';
 
 const createBookingSchema = z.object({
   service_id: z.string().uuid(),
@@ -114,14 +114,17 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Failed to create booking' }, { status: 500 });
     }
 
-    // 6. Trigger webhook (non-blocking)
-    triggerWebhook('new_booking', {
-      client_name: data.client_name,
-      client_phone: data.client_phone,
-      booking_date: data.booking_date,
-      start_time: data.start_time,
-      end_time,
-    }).catch(() => {});
+    // 6. Notify client via WhatsApp (non-blocking)
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? '';
+
+    sendGenericWhatsAppMessage(
+      data.client_name,
+      data.client_phone,
+      'new_booking',
+      `שלום ${data.client_name}! הבקשה שלך נתקבלה בהצלחה וממתינה לאישור.
+תאריך: ${data.booking_date} | שעה: ${data.start_time} - ${end_time}
+סוייננו בקרוב! פרטי ההזמנה: ${siteUrl}/booking/${booking.token}`
+    ).catch(() => { });
 
     return NextResponse.json({ token: booking.token }, { status: 201 });
   } catch {

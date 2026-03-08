@@ -5,6 +5,7 @@ import RegisterForm from './RegisterForm';
 import type { Event, EventType } from '@/types';
 import { createAdminClient } from '@/lib/supabase-admin';
 import ClientHeader from '@/components/ClientHeader';
+import ShareEventButton from '@/components/events/ShareEventButton';
 
 export const dynamic = 'force-dynamic';
 
@@ -92,14 +93,19 @@ export default async function EventPage({ params }: { params: { id: string } }) 
           <img src={imageUrl} alt={event.title} className="w-full h-full object-cover" />
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-primary/80 to-transparent" />
-        <div className="absolute bottom-0 right-0 p-6 text-right">
-          <span className="text-xs px-2.5 py-1 rounded-full bg-black/50 text-white/80 backdrop-blur-sm mb-2 inline-block">
-            {typeLabel}
-          </span>
-          <h1 className="text-2xl md:text-3xl font-bold text-white">{event.title}</h1>
-          {event.host_name && (
-            <p className="text-sm text-white/70 mt-1">עם {event.host_name}</p>
-          )}
+        <div className="absolute bottom-0 right-0 p-6 text-right w-full flex justify-between items-end">
+          <div className="z-10">
+            <ShareEventButton eventTitle={event.title} />
+          </div>
+          <div>
+            <span className="text-xs px-2.5 py-1 rounded-full bg-black/50 text-white/80 backdrop-blur-sm mb-2 inline-block">
+              {typeLabel}
+            </span>
+            <h1 className="text-2xl md:text-3xl font-bold text-white">{event.title}</h1>
+            {event.host_name && (
+              <p className="text-sm text-white/70 mt-1">עם {event.host_name}</p>
+            )}
+          </div>
         </div>
       </div>
 

@@ -5,6 +5,7 @@ import { createAdminClient } from '@/lib/supabase-admin';
 import { createClient } from '@/lib/supabase-server';
 import type { PaymentStatus } from '@/types';
 import DeleteClientButton from './DeleteClientButton';
+import ClientTagManager from './ClientTagManager';
 
 export const metadata: Metadata = {
   title: 'לקוחות | ניהול',
@@ -89,10 +90,10 @@ export default async function ClientsPage({
   const search = searchParams.search?.toLowerCase() ?? '';
   const filtered = search
     ? clients.filter(
-        c =>
-          c.name?.toLowerCase().includes(search) ||
-          c.phone?.includes(search)
-      )
+      c =>
+        c.name?.toLowerCase().includes(search) ||
+        c.phone?.includes(search)
+    )
     : clients;
 
   return (
@@ -150,6 +151,10 @@ export default async function ClientsPage({
                     {client.notes}
                   </p>
                 )}
+
+                <div className="mb-4">
+                  <ClientTagManager clientId={client.id} initialTags={client.tags || []} />
+                </div>
 
                 <form action={updateClientPayment} className="space-y-3">
                   <input type="hidden" name="id" value={client.id} />

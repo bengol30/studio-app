@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { createAdminClient } from '@/lib/supabase-admin';
 import { createClient } from '@/lib/supabase-server';
 import { createEvent, deleteEvent } from '@/lib/google-calendar';
-import { triggerWebhook } from '@/lib/make-webhooks';
+import { sendGenericWhatsAppMessage } from '@/lib/whatsapp';
 
 const updateSchema = z.object({
   status: z.enum(['confirmed', 'rejected', 'cancelled']),
@@ -93,23 +93,35 @@ export async function PATCH(request: NextRequest, { params }: Params) {
       return NextResponse.json({ error: 'Failed to update booking' }, { status: 500 });
     }
 
-    // Trigger webhook
-    const webhookKey = status === 'confirmed' ? 'booking_confirmed' : 'booking_rejected';
-    if (status !== 'cancelled') {
-      triggerWebhook(webhookKey, {
-        client_name: booking.client_name,
-        client_phone: booking.client_phone,
-        booking_date: booking.booking_date,
-        start_time: booking.start_time,
-        end_time: booking.end_time,
-        status,
-      }).catch(() => {});
-    } else {
-      triggerWebhook('booking_cancelled', {
-        client_name: booking.client_name,
-        client_phone: booking.client_phone,
-        booking_date: booking.booking_date,
-      }).catch(() => {});
+    // Notify client via WhatsApp
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? '';
+
+    if (status === 'confirmed') {
+      sendGenericWhatsAppMessage(
+        booking.client_name,
+        booking.client_phone,
+        `שלום ${booking.client_name}! הזמנה שלך אושרה בהצלחה 🎉
+תאריך: ${booking.booking_date}
+שעה: ${booking.start_time} - ${booking.end_time}
+נתראה בקרוב! פרטים: ${siteUrl}/booking/${booking.token}`,
+        'booking_confirmed'
+      ).catch(() => { });
+    } else if (status === 'rejected') {
+      sendGenericWhatsAppMessage(
+        booking.client_name,
+        booking.client_phone,
+        `שלום ${booking.client_name}, לצערנו הזמנה שלך לתאריך ${booking.booking_date} לא אושרה.
+אנא צור קשר ליד יד או בחר תאריך אחר באתר: ${siteUrl}/book`,
+        'booking_rejected'
+      ).catch(() => { });
+    } else if (status === 'cancelled') {
+      sendGenericWhatsAppMessage(
+        booking.client_name,
+        booking.client_phone,
+        `שלום ${booking.client_name}, הזמנה שלך לתאריך ${booking.booking_date} בוטלה.
+אנא צור קשר או הזמן מחדש: ${siteUrl}/book`,
+        'booking_cancelled_by_admin'
+      ).catch(() => { });
     }
 
     return NextResponse.json(updated);

@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import type { Service } from '@/types';
 import Step1Service from './Step1Service';
 import Step2Package from './Step2Package';
@@ -40,6 +40,24 @@ export default function BookingWizard({ services }: { services: Service[] }) {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  const searchParams = useSearchParams();
+
+  // Prefill from URL (Re-Book feature)
+  useEffect(() => {
+    const serviceId = searchParams.get('serviceId');
+    const name = searchParams.get('name');
+    const phone = searchParams.get('phone');
+
+    if (serviceId || name || phone) {
+      setState(prev => ({
+        ...prev,
+        serviceId: serviceId || prev.serviceId,
+        name: name || prev.name,
+        phone: phone || prev.phone,
+      }));
+    }
+  }, [searchParams]);
 
   function update(patch: Partial<WizardState>) {
     setState(prev => ({ ...prev, ...patch }));
@@ -106,10 +124,9 @@ export default function BookingWizard({ services }: { services: Service[] }) {
           return (
             <div
               key={label}
-              className={`flex-1 py-3 text-center text-xs transition-colors ${
-                isActive ? 'text-accent border-b-2 border-accent font-semibold' :
-                isDone ? 'text-green-400' : 'text-muted'
-              }`}
+              className={`flex-1 py-3 text-center text-xs transition-colors ${isActive ? 'text-accent border-b-2 border-accent font-semibold' :
+                  isDone ? 'text-green-400' : 'text-muted'
+                }`}
             >
               {isDone ? '✓' : stepNum}. {label}
             </div>
