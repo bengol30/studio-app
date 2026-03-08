@@ -78,6 +78,7 @@ async function createEvent(formData: FormData) {
   });
   revalidatePath('/admin/events');
   revalidatePath('/events');
+  redirect('/admin/events');
 }
 
 async function updateEventStatus(formData: FormData) {
