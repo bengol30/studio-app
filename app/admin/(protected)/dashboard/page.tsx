@@ -27,8 +27,11 @@ export default async function DashboardPage() {
   const { data: { user } } = await authClient.auth.getUser();
   const supabase = createAdminClient();
 
-  const today = new Date().toISOString().slice(0, 10);
-  const monthStart = today.slice(0, 7) + '-01'; // YYYY-MM-01
+  const todayStr = new Date().toISOString().slice(0, 10);
+  const monthStart = todayStr.slice(0, 7) + '-01'; // YYYY-MM-01
+  const lastMonthDate = new Date();
+  lastMonthDate.setMonth(lastMonthDate.getMonth() - 1);
+  const lastMonthStart = lastMonthDate.toISOString().slice(0, 7) + '-01';
 
   const [
     { count: pendingCount },
@@ -36,13 +39,14 @@ export default async function DashboardPage() {
     { count: clientCount },
     { count: upcomingEventsCount },
     { data: recentBookings },
-    { data: confirmedThisMonth },
+    { data: thisMonthData },
+    { data: lastMonthData },
     { data: allConfirmed },
   ] = await Promise.all([
     supabase.from('bookings').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
-    supabase.from('bookings').select('*', { count: 'exact', head: true }).eq('booking_date', today),
+    supabase.from('bookings').select('*', { count: 'exact', head: true }).eq('booking_date', todayStr),
     supabase.from('clients').select('*', { count: 'exact', head: true }),
-    supabase.from('events').select('*', { count: 'exact', head: true }).eq('status', 'open').gte('event_date', today),
+    supabase.from('events').select('*', { count: 'exact', head: true }).eq('status', 'open').gte('event_date', todayStr),
     supabase
       .from('bookings')
       .select('id, booking_date, start_time, end_time, client_name, client_phone, status, services(name), packages(name)')
@@ -50,22 +54,41 @@ export default async function DashboardPage() {
       .limit(6),
     supabase
       .from('bookings')
-      .select('packages(price)')
-      .eq('status', 'confirmed')
+      .select('id, packages(price)')
+      .in('status', ['confirmed'])
       .gte('booking_date', monthStart),
     supabase
       .from('bookings')
+      .select('id, packages(price)')
+      .in('status', ['confirmed'])
+      .gte('booking_date', lastMonthStart)
+      .lt('booking_date', monthStart),
+    supabase
+      .from('bookings')
       .select('start_time, booking_date, services(name)')
-      .eq('status', 'confirmed')
-      .order('created_at', { ascending: false })
-      .limit(200),
+      .in('status', ['confirmed'])
   ]);
 
   // ─── Insights calculations ─────────────────────────────────────────────────
-  const monthlyRevenue = (confirmedThisMonth ?? []).reduce((sum, b) => {
+  const monthlyRevenue = (thisMonthData ?? []).reduce((sum, b) => {
     const pkg = b.packages as unknown as { price?: number } | null;
     return sum + (pkg?.price ?? 0);
   }, 0);
+
+  const lastMonthRevenue = (lastMonthData ?? []).reduce((sum, b) => {
+    const pkg = b.packages as unknown as { price?: number } | null;
+    return sum + (pkg?.price ?? 0);
+  }, 0);
+
+  const revenueGrowth = lastMonthRevenue === 0
+    ? (monthlyRevenue > 0 ? 100 : 0)
+    : Math.round(((monthlyRevenue - lastMonthRevenue) / lastMonthRevenue) * 100);
+
+  const thisMonthBookingsCount = thisMonthData?.length ?? 0;
+  const lastMonthBookingsCount = lastMonthData?.length ?? 0;
+  const bookingsGrowth = lastMonthBookingsCount === 0
+    ? (thisMonthBookingsCount > 0 ? 100 : 0)
+    : Math.round(((thisMonthBookingsCount - lastMonthBookingsCount) / lastMonthBookingsCount) * 100);
 
   const DAYS_HE_SHORT = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת'];
   const dayCount: Record<number, number> = {};
@@ -73,18 +96,26 @@ export default async function DashboardPage() {
   const serviceCount: Record<string, number> = {};
 
   for (const b of allConfirmed ?? []) {
-    const d = new Date(`${b.booking_date}T00:00:00`);
-    dayCount[d.getDay()] = (dayCount[d.getDay()] ?? 0) + 1;
-    const h = parseInt((b.start_time as string)?.slice(0, 2) ?? '0');
-    hourCount[h] = (hourCount[h] ?? 0) + 1;
+    if (b.booking_date) {
+      const d = new Date(`${b.booking_date}T00:00:00`);
+      dayCount[d.getDay()] = (dayCount[d.getDay()] ?? 0) + 1;
+    }
+    if (b.start_time) {
+      const h = parseInt((b.start_time as string).slice(0, 2));
+      hourCount[h] = (hourCount[h] ?? 0) + 1;
+    }
     const svcName = (b.services as unknown as { name?: string } | null)?.name;
-    if (svcName) serviceCount[svcName] = (serviceCount[svcName] ?? 0) + 1;
+    if (svcName) {
+      serviceCount[svcName] = (serviceCount[svcName] ?? 0) + 1;
+    }
   }
 
   const peakDayIdx = Object.entries(dayCount).sort((a, b) => b[1] - a[1])[0]?.[0];
-  const peakDay = peakDayIdx !== undefined ? DAYS_HE_SHORT[parseInt(peakDayIdx)] : '—';
+  const peakDay = peakDayIdx !== undefined ? `ימי ${DAYS_HE_SHORT[parseInt(peakDayIdx)]}` : '—';
+
   const peakHourNum = Object.entries(hourCount).sort((a, b) => b[1] - a[1])[0]?.[0];
   const peakHour = peakHourNum !== undefined ? `${peakHourNum}:00` : '—';
+
   const topService = Object.entries(serviceCount).sort((a, b) => b[1] - a[1])[0]?.[0] ?? '—';
   // ──────────────────────────────────────────────────────────────────────────
 
@@ -117,24 +148,51 @@ export default async function DashboardPage() {
 
       {/* Insights */}
       <div className="bg-card rounded-xl p-6 border border-white/10 mb-6">
-        <h2 className="text-lg font-semibold text-primary-text text-right mb-4">📊 תובנות</h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          <div className="bg-primary rounded-xl p-4 text-right">
-            <p className="text-xs text-muted mb-1">יום שיא</p>
-            <p className="text-xl font-bold text-primary-text">{peakDay}</p>
+        <h2 className="text-lg font-semibold text-primary-text text-right mb-4">📈 מדדי ביצועים ותובנות</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+
+          {/* Revenue */}
+          <div className="bg-primary rounded-xl p-5 text-right border border-white/5">
+            <p className="text-xs text-muted mb-2">הכנסות החודש (מאושר)</p>
+            <div className="flex items-end justify-between flex-row-reverse">
+              <p className="text-2xl font-bold text-green-400">₪{monthlyRevenue.toLocaleString('he-IL')}</p>
+              <div className={`flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full ${revenueGrowth >= 0 ? 'bg-green-500/10 text-green-400' : 'bg-red-500/10 text-red-400'}`}>
+                <span>{revenueGrowth >= 0 ? '↑' : '↓'}</span>
+                <span dir="ltr">{Math.abs(revenueGrowth)}%</span>
+              </div>
+            </div>
+            <p className="text-[10px] text-muted mt-2">לעומת חודש שעבר (₪{lastMonthRevenue.toLocaleString('he-IL')})</p>
           </div>
-          <div className="bg-primary rounded-xl p-4 text-right">
-            <p className="text-xs text-muted mb-1">שעת שיא</p>
-            <p className="text-xl font-bold text-primary-text">{peakHour}</p>
+
+          {/* Bookings volume */}
+          <div className="bg-primary rounded-xl p-5 text-right border border-white/5">
+            <p className="text-xs text-muted mb-2">מספר הזמנות החודש</p>
+            <div className="flex items-end justify-between flex-row-reverse">
+              <p className="text-2xl font-bold text-primary-text">{thisMonthBookingsCount}</p>
+              <div className={`flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full ${bookingsGrowth >= 0 ? 'bg-green-500/10 text-green-400' : 'bg-red-500/10 text-red-400'}`}>
+                <span>{bookingsGrowth >= 0 ? '↑' : '↓'}</span>
+                <span dir="ltr">{Math.abs(bookingsGrowth)}%</span>
+              </div>
+            </div>
+            <p className="text-[10px] text-muted mt-2">לעומת חודש שעבר ({lastMonthBookingsCount} הזמנות)</p>
           </div>
-          <div className="bg-primary rounded-xl p-4 text-right">
-            <p className="text-xs text-muted mb-1">שירות מבוקש</p>
-            <p className="text-lg font-bold text-primary-text truncate">{topService}</p>
+
+          {/* Top Service */}
+          <div className="bg-primary rounded-xl p-5 text-right border border-white/5 flex flex-col justify-center">
+            <p className="text-xs text-muted mb-2">השירות המוביל</p>
+            <p className="text-xl font-bold text-primary-text truncate" title={topService}>{topService}</p>
+            <p className="text-[10px] text-muted mt-2">השירות שהוזמן הכי הרבה פעמים</p>
           </div>
-          <div className="bg-primary rounded-xl p-4 text-right">
-            <p className="text-xs text-muted mb-1">הכנסה החודש</p>
-            <p className="text-xl font-bold text-green-400">₪{monthlyRevenue.toLocaleString('he-IL')}</p>
+
+          {/* Peak times */}
+          <div className="bg-primary rounded-xl p-5 text-right border border-white/5 flex flex-col justify-center">
+            <p className="text-xs text-muted mb-2">זמני עומס בסטודיו</p>
+            <p className="text-lg font-bold text-primary-text">
+              {peakDay} סביב {peakHour}
+            </p>
+            <p className="text-[10px] text-muted mt-2">השעות והימים הנקבעים ביותר</p>
           </div>
+
         </div>
       </div>
 
