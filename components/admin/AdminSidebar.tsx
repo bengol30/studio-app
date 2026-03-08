@@ -11,6 +11,7 @@ const navItems = [
   { href: '/admin/clients', label: 'לקוחות', icon: '👥' },
   { href: '/admin/events', label: 'אירועים', icon: '🎵' },
   { href: '/admin/tasks', label: 'משימות', icon: '✅' },
+  { href: '/admin/portfolio', label: 'תיק עבודות', icon: '🖼️' },
   { href: '/admin/services', label: 'שירותים', icon: '🎛️' },
   { href: '/admin/settings', label: 'הגדרות', icon: '⚙️' },
 ];
@@ -40,11 +41,10 @@ export default function AdminSidebar() {
             <Link
               key={item.href}
               href={item.href}
-              className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors ${
-                isActive
+              className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors ${isActive
                   ? 'bg-accent/20 text-accent font-medium'
                   : 'text-muted hover:text-primary-text hover:bg-white/5'
-              }`}
+                }`}
             >
               <span>{item.icon}</span>
               <span>{item.label}</span>
