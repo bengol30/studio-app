@@ -28,6 +28,7 @@ export default async function DashboardPage() {
   const supabase = createAdminClient();
 
   const today = new Date().toISOString().slice(0, 10);
+  const monthStart = today.slice(0, 7) + '-01'; // YYYY-MM-01
 
   const [
     { count: pendingCount },
@@ -35,6 +36,8 @@ export default async function DashboardPage() {
     { count: clientCount },
     { count: upcomingEventsCount },
     { data: recentBookings },
+    { data: confirmedThisMonth },
+    { data: allConfirmed },
   ] = await Promise.all([
     supabase.from('bookings').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
     supabase.from('bookings').select('*', { count: 'exact', head: true }).eq('booking_date', today),
@@ -45,7 +48,45 @@ export default async function DashboardPage() {
       .select('id, booking_date, start_time, end_time, client_name, client_phone, status, services(name), packages(name)')
       .order('created_at', { ascending: false })
       .limit(6),
+    supabase
+      .from('bookings')
+      .select('packages(price)')
+      .eq('status', 'confirmed')
+      .gte('booking_date', monthStart),
+    supabase
+      .from('bookings')
+      .select('start_time, booking_date, services(name)')
+      .eq('status', 'confirmed')
+      .order('created_at', { ascending: false })
+      .limit(200),
   ]);
+
+  // ─── Insights calculations ─────────────────────────────────────────────────
+  const monthlyRevenue = (confirmedThisMonth ?? []).reduce((sum, b) => {
+    const pkg = b.packages as unknown as { price?: number } | null;
+    return sum + (pkg?.price ?? 0);
+  }, 0);
+
+  const DAYS_HE_SHORT = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת'];
+  const dayCount: Record<number, number> = {};
+  const hourCount: Record<number, number> = {};
+  const serviceCount: Record<string, number> = {};
+
+  for (const b of allConfirmed ?? []) {
+    const d = new Date(`${b.booking_date}T00:00:00`);
+    dayCount[d.getDay()] = (dayCount[d.getDay()] ?? 0) + 1;
+    const h = parseInt((b.start_time as string)?.slice(0, 2) ?? '0');
+    hourCount[h] = (hourCount[h] ?? 0) + 1;
+    const svcName = (b.services as unknown as { name?: string } | null)?.name;
+    if (svcName) serviceCount[svcName] = (serviceCount[svcName] ?? 0) + 1;
+  }
+
+  const peakDayIdx = Object.entries(dayCount).sort((a, b) => b[1] - a[1])[0]?.[0];
+  const peakDay = peakDayIdx !== undefined ? DAYS_HE_SHORT[parseInt(peakDayIdx)] : '—';
+  const peakHourNum = Object.entries(hourCount).sort((a, b) => b[1] - a[1])[0]?.[0];
+  const peakHour = peakHourNum !== undefined ? `${peakHourNum}:00` : '—';
+  const topService = Object.entries(serviceCount).sort((a, b) => b[1] - a[1])[0]?.[0] ?? '—';
+  // ──────────────────────────────────────────────────────────────────────────
 
   const stats = [
     { label: 'הזמנות ממתינות', value: pendingCount ?? 0, color: 'text-yellow-400', href: '/admin/bookings?status=pending' },
@@ -74,6 +115,29 @@ export default async function DashboardPage() {
         ))}
       </div>
 
+      {/* Insights */}
+      <div className="bg-card rounded-xl p-6 border border-white/10 mb-6">
+        <h2 className="text-lg font-semibold text-primary-text text-right mb-4">📊 תובנות</h2>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <div className="bg-primary rounded-xl p-4 text-right">
+            <p className="text-xs text-muted mb-1">יום שיא</p>
+            <p className="text-xl font-bold text-primary-text">{peakDay}</p>
+          </div>
+          <div className="bg-primary rounded-xl p-4 text-right">
+            <p className="text-xs text-muted mb-1">שעת שיא</p>
+            <p className="text-xl font-bold text-primary-text">{peakHour}</p>
+          </div>
+          <div className="bg-primary rounded-xl p-4 text-right">
+            <p className="text-xs text-muted mb-1">שירות מבוקש</p>
+            <p className="text-lg font-bold text-primary-text truncate">{topService}</p>
+          </div>
+          <div className="bg-primary rounded-xl p-4 text-right">
+            <p className="text-xs text-muted mb-1">הכנסה החודש</p>
+            <p className="text-xl font-bold text-green-400">₪{monthlyRevenue.toLocaleString('he-IL')}</p>
+          </div>
+        </div>
+      </div>
+
       <div className="bg-card rounded-xl p-6 border border-white/10">
         <div className="flex justify-between items-center mb-4">
           <Link href="/admin/bookings" className="text-xs text-accent hover:underline">כל ההזמנות</Link>
@@ -91,7 +155,7 @@ export default async function DashboardPage() {
                   <div className="text-right">
                     <p className="text-sm text-primary-text font-medium">{b.client_name}</p>
                     <p className="text-xs text-muted">
-                      {(b.services as unknown as { name: string } | null)?.name} · {formatDate(b.booking_date)} · {b.start_time?.slice(0,5)}
+                      {(b.services as unknown as { name: string } | null)?.name} · {formatDate(b.booking_date)} · {b.start_time?.slice(0, 5)}
                     </p>
                   </div>
                 </div>

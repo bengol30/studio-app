@@ -146,7 +146,7 @@ export default async function EventPage({ params }: { params: { id: string } }) 
         {!isFull ? (
           <div className="bg-card rounded-2xl border border-white/10 p-6">
             <h2 className="font-semibold text-primary-text text-right mb-4">הרשמה לאירוע</h2>
-            <RegisterForm eventId={event.id} />
+            <RegisterForm eventId={event.id} customFields={(event as Event & { custom_fields?: unknown[] }).custom_fields as Parameters<typeof RegisterForm>[0]['customFields'] ?? []} />
           </div>
         ) : (
           <div className="bg-card rounded-2xl border border-white/10 p-6 text-center">

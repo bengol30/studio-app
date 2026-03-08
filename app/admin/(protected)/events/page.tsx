@@ -64,6 +64,10 @@ async function createEvent(formData: FormData) {
 
   const supabase = createAdminClient();
   const maxAttendeesStr = formData.get('max_attendees') as string;
+  const customFieldsStr = formData.get('custom_fields') as string;
+  let customFields = [];
+  try { customFields = customFieldsStr ? JSON.parse(customFieldsStr) : []; } catch { customFields = []; }
+
   await supabase.from('events').insert({
     title: formData.get('title') as string,
     description: formData.get('description') as string || null,
@@ -75,6 +79,7 @@ async function createEvent(formData: FormData) {
     max_attendees: maxAttendeesStr ? parseInt(maxAttendeesStr) : null,
     host_name: formData.get('host_name') as string || null,
     image_url: formData.get('image_url') as string || null,
+    custom_fields: customFields,
     status: 'open',
   });
   revalidatePath('/admin/events');
@@ -230,11 +235,10 @@ export default async function EventsPage({
           <a
             key={tab.key}
             href={`/admin/events?status=${tab.key}`}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-              activeStatus === tab.key
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${activeStatus === tab.key
                 ? 'bg-accent/20 text-accent'
                 : 'text-muted hover:text-primary-text'
-            }`}
+              }`}
           >
             {tab.label}
           </a>
@@ -252,9 +256,8 @@ export default async function EventsPage({
           {events.map(event => (
             <div
               key={event.id}
-              className={`bg-card rounded-xl border p-5 transition-colors ${
-                editEventId === event.id ? 'border-accent/30' : 'border-white/10'
-              }`}
+              className={`bg-card rounded-xl border p-5 transition-colors ${editEventId === event.id ? 'border-accent/30' : 'border-white/10'
+                }`}
             >
               <div className="flex justify-between items-start mb-3">
                 <div className="flex gap-2 flex-wrap">
