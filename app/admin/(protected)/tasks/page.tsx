@@ -17,17 +17,6 @@ const STATUS_TABS = [
   { key: 'done', label: 'הושלמו' },
 ] as const;
 
-const STATUS_COLORS: Record<TaskStatus, string> = {
-  open: 'text-yellow-400 bg-yellow-400/10',
-  in_progress: 'text-blue-400 bg-blue-400/10',
-  done: 'text-green-400 bg-green-400/10',
-};
-
-const STATUS_LABELS: Record<TaskStatus, string> = {
-  open: 'פתוחה',
-  in_progress: 'בביצוע',
-  done: 'הושלם',
-};
 
 async function getTasks(status: string) {
   const supabase = createAdminClient();
