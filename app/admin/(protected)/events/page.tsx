@@ -79,6 +79,7 @@ async function createEvent(formData: FormData) {
   });
   revalidatePath('/admin/events');
   revalidatePath('/events');
+  revalidatePath('/');
   redirect('/admin/events');
 }
 
@@ -105,6 +106,7 @@ async function updateEvent(formData: FormData) {
   }).eq('id', id);
   revalidatePath('/admin/events');
   revalidatePath('/events');
+  revalidatePath('/');
   redirect('/admin/events');
 }
 
@@ -120,6 +122,7 @@ async function updateEventStatus(formData: FormData) {
   await supabase.from('events').update({ status }).eq('id', id);
   revalidatePath('/admin/events');
   revalidatePath('/events');
+  revalidatePath('/');
 }
 
 async function deleteEvent(formData: FormData) {
@@ -133,6 +136,7 @@ async function deleteEvent(formData: FormData) {
   await supabase.from('events').update({ is_deleted: true }).eq('id', id);
   revalidatePath('/admin/events');
   revalidatePath('/events');
+  revalidatePath('/');
 }
 
 export default async function EventsPage({
