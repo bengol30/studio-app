@@ -1,8 +1,10 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 export default function RegisterForm({ eventId }: { eventId: string }) {
+  const router = useRouter();
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [loading, setLoading] = useState(false);
@@ -26,6 +28,7 @@ export default function RegisterForm({ eventId }: { eventId: string }) {
         setError(data.error ?? 'אירעה שגיאה');
       } else {
         setSuccess(true);
+        router.refresh();
       }
     } catch {
       setError('אירעה שגיאה, נסה שוב');

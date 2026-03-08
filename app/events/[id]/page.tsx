@@ -33,6 +33,16 @@ function formatDate(dateStr: string) {
   return `${DAYS_HE[d.getDay()]}, ${d.toLocaleDateString('he-IL')}`;
 }
 
+async function getRegistrations(eventId: string) {
+  const supabase = createAdminClient();
+  const { data } = await supabase
+    .from('event_registrations')
+    .select('id, client_name, created_at')
+    .eq('event_id', eventId)
+    .order('created_at', { ascending: true });
+  return data ?? [];
+}
+
 async function getEvent(id: string): Promise<Event | null> {
   try {
     const supabase = createAdminClient();
@@ -57,7 +67,10 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
 }
 
 export default async function EventPage({ params }: { params: { id: string } }) {
-  const event = await getEvent(params.id);
+  const [event, registrations] = await Promise.all([
+    getEvent(params.id),
+    getRegistrations(params.id),
+  ]);
 
   if (!event) notFound();
 
@@ -132,6 +145,24 @@ export default async function EventPage({ params }: { params: { id: string } }) 
         ) : (
           <div className="bg-card rounded-2xl border border-white/10 p-6 text-center">
             <p className="text-muted">האירוע מלא – אין מקומות פנויים</p>
+          </div>
+        )}
+
+        {registrations.length > 0 && (
+          <div className="bg-card rounded-2xl border border-white/10 p-6 mt-6">
+            <h2 className="font-semibold text-primary-text text-right mb-4">
+              נרשמים לאירוע ({registrations.length})
+            </h2>
+            <div className="flex flex-wrap gap-2 justify-end">
+              {registrations.map(reg => (
+                <span
+                  key={reg.id}
+                  className="px-3 py-1.5 bg-primary rounded-full text-sm text-primary-text"
+                >
+                  {reg.client_name}
+                </span>
+              ))}
+            </div>
           </div>
         )}
       </div>
