@@ -72,7 +72,7 @@
 
 | # | משימה | אייג'נט | סטטוס |
 |---|--------|---------|--------|
-| 34/35 | שדות דינמיים באירועים (CreateEvent/Register) | CODER | 🔄 חלקי (חסר Edit) |
+| 34/35 | שדות דינמיים באירועים (CreateEvent/Register) | CODER | ✅ הושלם |
 | 36 | גלריית תיק עבודות YouTube/Image Upload | UI | ✅ הושלם |
 | 37 | דאשבורד משודרג – השוואת חודשים + Peak Times | CODER | ✅ הושלם |
 | 38 | Review + Security + QA שלב 3 | REVIEW+SEC+QA | 🔄 בתהליך |

@@ -105,13 +105,13 @@
 
 **תאריך:** 08/03/2026
 **מה נעשה:**
-- **הושלם (חלקית) Task 34/35:** שדות דינמיים באירועים (נוספו ל-CreateEvent ול-RegisterForm. חסר עדיין ב-EditEventForm). תשובות נשמרות ב-JSONB ומוצגות למנהל.
+- **הושלם Task 34/35:** שדות דינמיים באירועים (נוספו ל-CreateEvent, RegisterForm, ול-EditEventForm). תשובות נשמרות ב-JSONB ומוצגות למנהל וללקוח בהרשמה.
 - **הושלם Task 36:** גלריית תיק עבודות (`/about`). נוסף מנגנון מדיה כפול: העלאת תמונה ישירה ל-Supabase, או הדבקת קישור יוטיוב עם חילוץ אוטומטי של התמונה הממוזערת (Thumbnail). פריטי הגלריה נשמרים ב-JSON בטבלת `settings`.
 - **הושלם Task 37:** שדרוג Dashboard Insights. הוסרו הנתונים היבשים ובמקומם יש השוואת הכנסות ומספר הזמנות מול *חודש קודם* (באחוזים וחיצים), זיהוי השירות המוביל, ושקלול שעות/ימי שיא מדויקים.
 - **תיקוני באגים פוסט-השקה:**
   - תוקן באג קריטי במסך ניהול הזמנות (AdminBookingsList) שבו לחיצה על "אשר/דחה" שורתי בחרה לא נכון את כל האלמנטים שסומנו בעבר ב-state.
   - תוקן חוסר סנכרון בספירת "הזמנות ממתינות" בדאשבורד. נוסף סינון `.eq('is_deleted', false)` בכל השאילתות הרלוונטיות לאחר שהתברר שהיו רשומות ישנות עם null.
-**קבצים ששונו:** `app/admin/(protected)/events/page.tsx`, `components/admin/CreateEventForm.tsx`, `components/events/RegisterForm.tsx`, `app/events/[id]/page.tsx`, `app/api/events/[id]/register/route.ts`, `app/about/page.tsx`, `app/admin/(protected)/portfolio/page.tsx`, `app/admin/(protected)/portfolio/PortfolioEditor.tsx`, `app/admin/(protected)/dashboard/page.tsx`, `app/admin/(protected)/bookings/AdminBookingsList.tsx`.
+**קבצים ששונו:** `components/admin/EditEventForm.tsx`, `components/admin/CreateEventForm.tsx`, `components/events/RegisterForm.tsx`, `app/events/[id]/page.tsx`, `app/api/events/[id]/register/route.ts`, `app/about/page.tsx`, `app/admin/(protected)/portfolio/page.tsx`, `app/admin/(protected)/portfolio/PortfolioEditor.tsx`, `app/admin/(protected)/dashboard/page.tsx`, `app/admin/(protected)/bookings/AdminBookingsList.tsx`.
 
 ---
 
