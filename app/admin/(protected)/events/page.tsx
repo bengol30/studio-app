@@ -167,14 +167,14 @@ export default async function EventsPage({
 
   return (
     <div className="p-6" dir="rtl">
-      <div className="mb-6 flex justify-between items-start">
+      <div className="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h1 className="text-2xl font-bold text-primary-text">אירועים</h1>
           <p className="text-muted text-sm mt-1">{events.length} אירועים</p>
         </div>
         <a
           href="/admin/events?view=new"
-          className="px-4 py-2 bg-accent text-white rounded-xl text-sm font-medium hover:bg-accent/90 transition-colors"
+          className="px-4 py-2 bg-accent text-white rounded-xl text-sm font-medium hover:bg-accent/90 transition-colors w-full sm:w-auto text-center"
         >
           + אירוע חדש
         </a>
@@ -230,14 +230,14 @@ export default async function EventsPage({
       )}
 
       {/* Tabs */}
-      <div className="flex gap-1 mb-6 bg-card rounded-xl p-1 w-fit border border-white/10">
+      <div className="flex gap-1 mb-6 bg-card rounded-xl p-1 w-full sm:w-fit border border-white/10 overflow-x-auto hide-scrollbar">
         {STATUS_TABS.map(tab => (
           <a
             key={tab.key}
             href={`/admin/events?status=${tab.key}`}
             className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${activeStatus === tab.key
-                ? 'bg-accent/20 text-accent'
-                : 'text-muted hover:text-primary-text'
+              ? 'bg-accent/20 text-accent'
+              : 'text-muted hover:text-primary-text'
               }`}
           >
             {tab.label}
@@ -259,8 +259,8 @@ export default async function EventsPage({
               className={`bg-card rounded-xl border p-5 transition-colors ${editEventId === event.id ? 'border-accent/30' : 'border-white/10'
                 }`}
             >
-              <div className="flex justify-between items-start mb-3">
-                <div className="flex gap-2 flex-wrap">
+              <div className="flex flex-col-reverse sm:flex-row justify-between items-start sm:items-center mb-3 min-h-10">
+                <div className="flex gap-2 flex-wrap mt-3 sm:mt-0 w-full sm:w-auto">
                   {activeStatus === 'open' && (
                     <form action={updateEventStatus}>
                       <input type="hidden" name="id" value={event.id} />
@@ -299,7 +299,7 @@ export default async function EventsPage({
                     {event.max_attendees ? `/${event.max_attendees}` : ''})
                   </a>
                 </div>
-                <div className="text-right">
+                <div className="text-right w-full sm:w-auto">
                   <p className="font-semibold text-primary-text">{event.title}</p>
                   <p className="text-xs text-muted">
                     {EVENT_TYPE_LABELS[event.event_type as EventType]}

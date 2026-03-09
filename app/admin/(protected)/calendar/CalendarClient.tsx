@@ -78,34 +78,34 @@ export default function CalendarClient({ bookings, blockedTimes, services, year,
   return (
     <div>
       {/* Header */}
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex gap-1 bg-card border border-white/10 rounded-xl p-1">
+      <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-4">
+        <div className="flex gap-1 bg-card border border-white/10 rounded-xl p-1 w-full md:w-auto justify-center">
           {(['month', 'list'] as const).map(v => (
             <button
               key={v}
               onClick={() => { setView(v); router.push(`/admin/calendar?year=${year}&month=${month}&view=${v}`); }}
-              className={`px-4 py-1.5 rounded-lg text-sm transition-colors ${view === v ? 'bg-accent/20 text-accent font-medium' : 'text-muted hover:text-primary-text'}`}
+              className={`flex-1 md:flex-none px-4 py-1.5 rounded-lg text-sm transition-colors ${view === v ? 'bg-accent/20 text-accent font-medium' : 'text-muted hover:text-primary-text'}`}
             >
               {v === 'month' ? 'חודשי' : 'רשימה'}
             </button>
           ))}
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center justify-center gap-3 w-full md:w-auto">
           <button onClick={() => navigate('next')} className="text-muted hover:text-primary-text p-1">›</button>
-          <h2 className="text-lg font-semibold text-primary-text min-w-36 text-center">
+          <h2 className="text-lg font-semibold text-primary-text min-w-28 md:min-w-36 text-center">
             {MONTH_NAMES_HE[month - 1]} {year}
           </h2>
           <button onClick={() => navigate('prev')} className="text-muted hover:text-primary-text p-1">‹</button>
-          <div className="flex gap-2">
+          <div className="flex gap-2 w-full md:w-auto">
             <button
               onClick={() => setIsBlockTimeOpen(true)}
-              className="px-3 py-1.5 border border-red-500/30 text-red-400 hover:bg-red-500/10 rounded-lg text-sm font-medium transition-colors"
+              className="flex-1 md:flex-none px-3 py-1.5 border border-red-500/30 text-red-400 hover:bg-red-500/10 rounded-lg text-sm font-medium transition-colors"
             >
               חסום זמן / יומן
             </button>
             <button
               onClick={() => setIsQuickBookOpen(true)}
-              className="bg-accent hover:bg-accent/90 text-white px-3 py-1.5 rounded-lg text-sm font-medium transition-colors mr-2"
+              className="flex-1 md:flex-none bg-accent hover:bg-accent/90 text-white px-3 py-1.5 rounded-lg text-sm font-medium transition-colors md:mr-2"
             >
               + Quick Book
             </button>
@@ -167,7 +167,7 @@ export default function CalendarClient({ bookings, blockedTimes, services, year,
                         className={`w-full text-right text-xs px-1 py-0.5 rounded truncate transition-colors ${b.status === 'confirmed' ? 'bg-green-500/20 text-green-300 hover:bg-green-500/30' : 'bg-yellow-500/20 text-yellow-300 hover:bg-yellow-500/30'
                           }`}
                       >
-                        {b.start_time} {b.client_name}
+                        {b.start_time.slice(0, 5)} {b.client_name}
                       </button>
                     ))}
                     {dayBookings.length > 3 && (
