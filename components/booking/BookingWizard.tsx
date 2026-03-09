@@ -116,22 +116,24 @@ export default function BookingWizard({ services }: { services: Service[] }) {
   return (
     <div className="bg-card rounded-2xl border border-white/10 overflow-hidden">
       {/* Step indicator */}
-      <div className="flex border-b border-white/10">
-        {STEPS.map((label, i) => {
-          const stepNum = (i + 1) as WizardState['step'];
-          const isActive = state.step === stepNum;
-          const isDone = state.step > stepNum;
-          return (
-            <div
-              key={label}
-              className={`flex-1 py-3 text-center text-xs transition-colors ${isActive ? 'text-accent border-b-2 border-accent font-semibold' :
+      <div className="overflow-x-auto border-b border-white/10 hide-scrollbar">
+        <div className="flex min-w-[500px] w-full">
+          {STEPS.map((label, i) => {
+            const stepNum = (i + 1) as WizardState['step'];
+            const isActive = state.step === stepNum;
+            const isDone = state.step > stepNum;
+            return (
+              <div
+                key={label}
+                className={`flex-1 py-4 text-center text-xs md:text-sm transition-colors ${isActive ? 'text-accent border-b-2 border-accent font-semibold' :
                   isDone ? 'text-green-400' : 'text-muted'
-                }`}
-            >
-              {isDone ? '✓' : stepNum}. {label}
-            </div>
-          );
-        })}
+                  }`}
+              >
+                {isDone ? '✓' : stepNum}. {label}
+              </div>
+            );
+          })}
+        </div>
       </div>
 
       {/* Step content */}

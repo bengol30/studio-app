@@ -87,7 +87,7 @@ export default async function HomePage() {
       <ClientHeader />
 
       {/* Hero */}
-      <section className="relative py-20 md:py-32 px-4 text-center overflow-hidden">
+      <section className="relative py-12 md:py-32 px-4 text-center overflow-hidden">
         {/* Glow effect */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] bg-accent/5 rounded-full blur-3xl pointer-events-none" />
 
@@ -104,16 +104,16 @@ export default async function HomePage() {
             הקלט מוזיקה, פודקאסטים ותוכן שמע בסביבה מקצועית.
             ציוד מהשורה הראשונה, אקוסטיקה מושלמת.
           </p>
-          <div className="flex gap-3 justify-center flex-wrap">
+          <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
             <Link
               href="/book"
-              className="bg-accent hover:bg-accent/90 text-white font-bold px-8 py-3.5 rounded-xl transition-all shadow-lg shadow-accent/20 hover:shadow-accent/30"
+              className="bg-accent hover:bg-accent/90 text-white font-bold px-8 py-3.5 rounded-xl transition-all shadow-lg shadow-accent/20 hover:shadow-accent/30 w-full sm:w-auto"
             >
               הזמן עכשיו
             </Link>
             <Link
               href="/events"
-              className="border border-white/15 hover:border-white/30 text-primary-text px-8 py-3.5 rounded-xl transition-colors"
+              className="border border-white/15 hover:border-white/30 text-primary-text px-8 py-3.5 rounded-xl transition-colors w-full sm:w-auto"
             >
               אירועים
             </Link>
@@ -185,30 +185,30 @@ export default async function HomePage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
             {services.length === 0
               ? ['הקלטות מוזיקה', 'פודקאסט', 'מיקסינג ומאסטרינג'].map(name => (
-                  <div key={name} className="bg-card border border-white/10 rounded-2xl p-6 hover:border-white/20 transition-colors">
-                    <div className="w-10 h-10 bg-accent/10 rounded-xl flex items-center justify-center mb-4">
-                      <span className="text-accent text-lg">🎵</span>
-                    </div>
-                    <h3 className="font-semibold text-primary-text mb-2">{name}</h3>
-                    <p className="text-sm text-muted">שירות מקצועי באולפן</p>
+                <div key={name} className="bg-card border border-white/10 rounded-2xl p-6 hover:border-white/20 transition-colors">
+                  <div className="w-10 h-10 bg-accent/10 rounded-xl flex items-center justify-center mb-4">
+                    <span className="text-accent text-lg">🎵</span>
                   </div>
-                ))
+                  <h3 className="font-semibold text-primary-text mb-2">{name}</h3>
+                  <p className="text-sm text-muted">שירות מקצועי באולפן</p>
+                </div>
+              ))
               : services.map(service => (
-                  <div key={service.id} className="bg-card border border-white/10 rounded-2xl p-6 hover:border-accent/30 transition-colors group">
-                    <div className="w-10 h-10 bg-accent/10 rounded-xl flex items-center justify-center mb-4 group-hover:bg-accent/20 transition-colors">
-                      <span className="text-accent text-lg">🎵</span>
-                    </div>
-                    <h3 className="font-semibold text-primary-text text-lg mb-2">{service.name}</h3>
-                    {service.description && (
-                      <p className="text-sm text-muted mb-4 leading-relaxed">{service.description}</p>
-                    )}
-                    {service.packages && service.packages.length > 0 && (
-                      <p className="text-accent text-sm font-semibold">
-                        החל מ-₪{Math.min(...service.packages.map(p => p.price))}
-                      </p>
-                    )}
+                <div key={service.id} className="bg-card border border-white/10 rounded-2xl p-6 hover:border-accent/30 transition-colors group">
+                  <div className="w-10 h-10 bg-accent/10 rounded-xl flex items-center justify-center mb-4 group-hover:bg-accent/20 transition-colors">
+                    <span className="text-accent text-lg">🎵</span>
                   </div>
-                ))}
+                  <h3 className="font-semibold text-primary-text text-lg mb-2">{service.name}</h3>
+                  {service.description && (
+                    <p className="text-sm text-muted mb-4 leading-relaxed">{service.description}</p>
+                  )}
+                  {service.packages && service.packages.length > 0 && (
+                    <p className="text-accent text-sm font-semibold">
+                      החל מ-₪{Math.min(...service.packages.map(p => p.price))}
+                    </p>
+                  )}
+                </div>
+              ))}
           </div>
 
           <div className="text-center mt-10">
@@ -224,7 +224,7 @@ export default async function HomePage() {
 
       {/* Features strip */}
       <section className="py-12 px-4 border-t border-white/5">
-        <div className="max-w-3xl mx-auto grid grid-cols-3 gap-6 text-center">
+        <div className="max-w-3xl mx-auto grid grid-cols-1 sm:grid-cols-3 gap-8 text-center">
           {[
             { icon: '🎛️', title: 'ציוד מקצועי', desc: 'מיקרופונים ואביזרים מהשורה הראשונה' },
             { icon: '🔇', title: 'אקוסטיקה מושלמת', desc: 'חדר מטופל אקוסטית' },
