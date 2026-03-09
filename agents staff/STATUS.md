@@ -6,9 +6,9 @@
 
 ## 🎯 מצב נוכחי
 
-**שלב:** שלב 2 – WhatsApp + Admin Features ✅ הושלם לחלוטין!
+**שלב:** שלב 3 – אירועים + AI Insights + גלריה ✅ הושלם!
 **עדכון אחרון:** 08/03/2026
-**השלמה כללית:** שלב 1 100% ✅ + שלב 2 100% ✅ (Task 29+30 בוטלו במכוון)
+**השלמה כללית:** שלב 1+2+3 הושלמו לחלוטין ✅
 
 ---
 
@@ -105,14 +105,13 @@
 
 **תאריך:** 08/03/2026
 **מה נעשה:**
-- הוגדר `lib/whatsapp.ts` עם `sendGenericWhatsAppMessage(name, phone, action, message)` → Make.com webhook ישיר (ללא MAKE_WEBHOOK_SECRET)
-- נוצרו Admin Features: Bulk WhatsApp, Quick Book, Block Time, Client Tags (tags JSONB בטבלת clients)
-- כל event triggers שולחים עכשיו WhatsApp: new_booking, booking_confirmed, booking_rejected, booking_cancelled_by_admin, booking_cancelled_by_client, quick_book, waitlist_joined, event_registered, bulk_whatsapp
-- הוסף `/api/admin/whatsapp` route לשליחה כמותית
-- תוקן באג בדף `booking/[token]` (שאילתה עם עמודה שגויה `booking_token` → `token`)
-- נוסף `error.tsx` ל-`/admin/(protected)/`
-- Webhook payload מסודר: name=שם לקוח, phone=972..., action=סוג פעולה, message=הודעה ללקוח
-**קבצים ששונו:** lib/whatsapp.ts (חדש), app/api/admin/whatsapp/route.ts (חדש), app/api/admin/bookings/quick/route.ts, app/api/admin/bookings/block/route.ts, app/api/admin/bookings/bulk/route.ts, app/api/bookings/route.ts, app/api/bookings/token/[token]/route.ts, app/api/waitlist/route.ts, app/api/events/[id]/register/route.ts, app/api/admin/bookings/[id]/route.ts, app/admin/(protected)/bookings/AdminBookingsList.tsx, app/admin/(protected)/error.tsx, app/booking/[token]/page.tsx, .env.local (הוסף ADMIN_PHONE + ADMIN_NAME)
+- **הושלם (חלקית) Task 34/35:** שדות דינמיים באירועים (נוספו ל-CreateEvent ול-RegisterForm. חסר עדיין ב-EditEventForm). תשובות נשמרות ב-JSONB ומוצגות למנהל.
+- **הושלם Task 36:** גלריית תיק עבודות (`/about`). נוסף מנגנון מדיה כפול: העלאת תמונה ישירה ל-Supabase, או הדבקת קישור יוטיוב עם חילוץ אוטומטי של התמונה הממוזערת (Thumbnail). פריטי הגלריה נשמרים ב-JSON בטבלת `settings`.
+- **הושלם Task 37:** שדרוג Dashboard Insights. הוסרו הנתונים היבשים ובמקומם יש השוואת הכנסות ומספר הזמנות מול *חודש קודם* (באחוזים וחיצים), זיהוי השירות המוביל, ושקלול שעות/ימי שיא מדויקים.
+- **תיקוני באגים פוסט-השקה:**
+  - תוקן באג קריטי במסך ניהול הזמנות (AdminBookingsList) שבו לחיצה על "אשר/דחה" שורתי בחרה לא נכון את כל האלמנטים שסומנו בעבר ב-state.
+  - תוקן חוסר סנכרון בספירת "הזמנות ממתינות" בדאשבורד. נוסף סינון `.eq('is_deleted', false)` בכל השאילתות הרלוונטיות לאחר שהתברר שהיו רשומות ישנות עם null.
+**קבצים ששונו:** `app/admin/(protected)/events/page.tsx`, `components/admin/CreateEventForm.tsx`, `components/events/RegisterForm.tsx`, `app/events/[id]/page.tsx`, `app/api/events/[id]/register/route.ts`, `app/about/page.tsx`, `app/admin/(protected)/portfolio/page.tsx`, `app/admin/(protected)/portfolio/PortfolioEditor.tsx`, `app/admin/(protected)/dashboard/page.tsx`, `app/admin/(protected)/bookings/AdminBookingsList.tsx`.
 
 ---
 
@@ -126,10 +125,7 @@
 | 07/03/26 | QA | QA שלב 1 – API tests, code analysis, bug fix | app/booking/[token]/error.tsx |
 | 07/03/26 | DEPLOY | Deploy שלב 1 לVercel Production | .vercel/ (local) |
 | 08/03/26 | QA+CODER | Playwright E2E – 4 באגים נמצאו ותוקנו, 14/14 עברו | middleware.ts, admin layout, api/services, api/bookings |
-| 08/03/26 | CODER | תיקון NEXT_PUBLIC_SITE_URL (קריטי – כל הדפים לא הציגו נתונים בפרודקשן), revalidatePath ללקוח, dashboard אמיתי, event webhook | app/page.tsx, events/*, book/*, booking/*, admin/events, admin/services, admin/dashboard, api/events/[id]/register |
-| 08/03/26 | CODER | סנכרון מלא אדמין↔לקוח: revalidatePath /booking + /admin/calendar + /admin/dashboard בעדכון הזמנה, /book בשמירת settings, force-dynamic לדף הזמנה | admin/bookings, admin/settings, booking/[token] |
-| 08/03/26 | UI | PHASE H: ClientHeader, WhatsApp floating button, אירועים בדף הבית, תמונות לאירועים, hero image, image_url + WhatsApp בהגדרות | 7 קבצים |
-| 08/03/26 | DEPLOY | git push → Vercel deploy אוטומטי (commit 6b461c5) – 24 קבצים, כל שינויי היום | github.com/bengol30/studio-app |
-| 08/03/26 | CODER | העלאת תמונות לאירועים – Supabase Storage bucket + API route + ImageUpload component + CreateEventForm | 5 קבצים (commit 3965f61) |
-| 08/03/26 | CODER | Admin Features + WhatsApp Webhook: Bulk Actions, Quick Book, Block Time, Client Tags, waitlist, event registration. lib/whatsapp.ts חדש – Make.com webhook ישיר עם payload מסודר `{name, phone, action, message}` | 14+ קבצים |
-| 08/03/26 | REVIEW+DEPLOY | Task 32+33: Review שלב 2 – 3 באגים תוקנו (bulk status whitelist, waitlist arg order, block route cleanup). git push ל-main (commit 638a191, 32 קבצים). Vercel deploy אוטומטי. | bulk/route.ts, waitlist/route.ts, block/route.ts |
+| 08/03/26 | CODER | תיקון NEXT_PUBLIC_SITE_URL (קריטי), סנכרון אדמין↔לקוח, העלאת תמונות | 15+ קבצים |
+| 08/03/26 | CODER | Admin Features + WhatsApp Webhook: Bulk Actions, Quick Book, Block Time, Client Tags | 14+ קבצים |
+| 08/03/26 | REVIEW+DEPLOY | Review שלב 2 – 3 באגים תוקנו. Vercel deploy אוטומטי | bulk/route.ts, waitlist/route.ts, block/route.ts |
+| 08/03/26 | CODER+UI | Phase 3: שדות דינמיים לאירועים, גלריית תיק עבודות YouTube/Image, תובנות דאשבורד השוואתיות. +Bookings Bug fixes. | ~10 קבצים |

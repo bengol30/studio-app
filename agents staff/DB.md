@@ -38,7 +38,12 @@
 | tasks | — | — | ALL |
 | whatsapp_qa | — | — | ALL |
 | whatsapp_templates | — | — | ALL |
-| settings | SELECT (public keys) | SELECT | ALL |
+| settings | SELECT (public keys/portfolio) | SELECT | ALL |
+
+**שינויי סכימה אחרונים:**
+1. הוספת עמודת `custom_fields` מסוג `JSONB` לטבלת `events` כדי לתמוך בשאלות הרשמה דינמיות.
+2. הוספת מפתח `portfolio` לטבלת `settings` (ב-JSONB) לניהול גלריית "תיק עבודות" מדף הבית.
+3. הוספת תשובות `custom_fields` לטבלת `event_registrations`.
 
 ---
 

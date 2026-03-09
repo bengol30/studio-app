@@ -72,12 +72,11 @@
 
 | # | משימה | אייג'נט | סטטוס |
 |---|--------|---------|--------|
-| 34 | מערכת אירועים מלאה (CRUD + הרשמות) | CODER | ⏸ ממתין |
-| 35 | שדות דינמיים לאירועים | CODER | ⏸ ממתין |
-| 36 | גלריית תיק עבודות | UI | ⏸ ממתין |
-| 37 | דאשבורד + תובנות AI + AI Session Summary | CODER | ⏸ ממתין |
-| 38 | Review + Security + QA שלב 3 | REVIEW+SEC+QA | ⏸ ממתין |
-| 39 | Deploy שלב 3 | DEPLOY | ⏸ ממתין |
+| 34/35 | שדות דינמיים באירועים (CreateEvent/Register) | CODER | 🔄 חלקי (חסר Edit) |
+| 36 | גלריית תיק עבודות YouTube/Image Upload | UI | ✅ הושלם |
+| 37 | דאשבורד משודרג – השוואת חודשים + Peak Times | CODER | ✅ הושלם |
+| 38 | Review + Security + QA שלב 3 | REVIEW+SEC+QA | 🔄 בתהליך |
+| 39 | Deploy שלב 3 | DEPLOY | 🔄 בתהליך |
 
 ---
 
