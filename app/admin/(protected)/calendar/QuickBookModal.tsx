@@ -71,9 +71,9 @@ export default function QuickBookModal({ onClose, onSuccess, services, initialDa
     };
 
     return (
-        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4" onClick={onClose} dir="rtl">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-in fade-in duration-200" onClick={onClose} dir="rtl">
             <div
-                className="bg-card border border-white/10 rounded-2xl p-6 max-w-md w-full max-h-[90vh] overflow-y-auto"
+                className="bg-card w-full max-w-md rounded-2xl border border-white/10 shadow-2xl overflow-y-auto max-h-[90vh] p-6 animate-in zoom-in-95 duration-200"
                 onClick={e => e.stopPropagation()}
             >
                 <div className="flex justify-between items-start mb-4">

@@ -63,14 +63,14 @@ export default function BlockTimeModal({ onClose, onSuccess, initialDate, initia
     };
 
     return (
-        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4" onClick={onClose} dir="rtl">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-in fade-in duration-200" onClick={onClose} dir="rtl">
             <div
-                className="bg-card border border-white/10 rounded-2xl p-6 max-w-sm w-full"
+                className="bg-card w-full max-w-md rounded-2xl border border-red-500/20 shadow-2xl p-6 animate-in zoom-in-95 duration-200"
                 onClick={e => e.stopPropagation()}
             >
                 <div className="flex justify-between items-start mb-4">
                     <button onClick={onClose} className="text-muted hover:text-primary-text">✕</button>
-                    <h2 className="text-xl font-bold text-primary-text">חסום זמן / יומן</h2>
+                    <h2 className="text-xl font-bold text-red-400">חסום זמן / יומן</h2>
                 </div>
 
                 <form onSubmit={handleSubmit} className="space-y-4">

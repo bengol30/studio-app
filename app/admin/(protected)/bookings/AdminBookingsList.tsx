@@ -81,9 +81,14 @@ export default function AdminBookingsList({ bookings, activeStatus }: Props) {
 
     if (bookings.length === 0) {
         return (
-            <div className="text-center py-16 text-muted">
-                <p className="text-4xl mb-3">📭</p>
-                <p>אין הזמנות בסטטוס זה</p>
+            <div className="flex flex-col items-center justify-center py-20 bg-card/50 border-2 border-dashed border-white/5 rounded-3xl mt-6">
+                <div className="w-20 h-20 bg-white/5 flex items-center justify-center rounded-full mb-4">
+                    <span className="text-4xl">📭</span>
+                </div>
+                <h3 className="text-lg font-medium text-primary-text mb-1">היומן שלך שקט כרגע</h3>
+                <p className="text-sm text-muted text-center max-w-sm">
+                    אין הזמנות חדשות בסטטוס זה. הזמנות שיכנסו או ישנו סטטוס יופיעו כאן.
+                </p>
             </div>
         );
     }
@@ -179,11 +184,11 @@ export default function AdminBookingsList({ bookings, activeStatus }: Props) {
                 <span className="text-sm text-muted">בחר הכל</span>
             </div>
 
-            <div className="space-y-3">
+            <div className="space-y-4">
                 {bookings.map((booking: BookingRow) => (
                     <div
                         key={booking.id}
-                        className={`bg-card rounded-xl border p-5 transition-colors flex gap-4 ${selectedIds.has(booking.id) ? 'border-accent bg-accent/5' : 'border-white/10'
+                        className={`bg-card/80 backdrop-blur-sm rounded-2xl border p-5 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 flex gap-4 ${selectedIds.has(booking.id) ? 'border-accent/50 bg-accent/5' : 'border-white/5 hover:border-accent/30'
                             }`}
                     >
                         <div className="pt-1">
@@ -228,27 +233,27 @@ export default function AdminBookingsList({ bookings, activeStatus }: Props) {
                                 </div>
                             </div>
 
-                            <div className="grid grid-cols-2 gap-2 text-sm">
-                                <div className="bg-primary rounded-lg px-3 py-2">
-                                    <span className="text-muted">שירות: </span>
-                                    <span className="text-primary-text">
+                            <div className="grid grid-cols-2 gap-3 mt-4 text-sm">
+                                <div className="flex items-center gap-2 bg-primary/50 backdrop-blur rounded-xl px-3 py-2.5 border border-white/5">
+                                    <span className="text-muted text-lg">🎛️</span>
+                                    <span className="text-primary-text font-medium truncate" title={booking.services?.name}>
                                         {booking.services?.name}
                                     </span>
                                 </div>
-                                <div className="bg-primary rounded-lg px-3 py-2">
-                                    <span className="text-muted">חבילה: </span>
-                                    <span className="text-primary-text">
+                                <div className="flex items-center gap-2 bg-primary/50 backdrop-blur rounded-xl px-3 py-2.5 border border-white/5">
+                                    <span className="text-muted text-lg">📦</span>
+                                    <span className="text-primary-text font-medium truncate" title={booking.packages?.name}>
                                         {booking.packages?.name}
                                     </span>
                                 </div>
-                                <div className="bg-primary rounded-lg px-3 py-2">
-                                    <span className="text-muted">תאריך: </span>
-                                    <span className="text-primary-text">{formatDate(booking.booking_date)}</span>
+                                <div className="flex items-center gap-2 bg-primary/50 backdrop-blur rounded-xl px-3 py-2.5 border border-white/5">
+                                    <span className="text-muted text-lg">🗓️</span>
+                                    <span className="text-primary-text font-medium">{formatDate(booking.booking_date)}</span>
                                 </div>
-                                <div className="bg-primary rounded-lg px-3 py-2">
-                                    <span className="text-muted">שעה: </span>
-                                    <span className="text-primary-text">
-                                        {booking.start_time} – {booking.end_time}
+                                <div className="flex items-center gap-2 bg-primary/50 backdrop-blur rounded-xl px-3 py-2.5 border border-white/5">
+                                    <span className="text-muted text-lg">⏰</span>
+                                    <span className="text-primary-text font-medium" dir="ltr">
+                                        {booking.start_time.slice(0, 5)} - {booking.end_time.slice(0, 5)}
                                     </span>
                                 </div>
                             </div>

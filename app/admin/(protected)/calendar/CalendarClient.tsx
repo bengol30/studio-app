@@ -182,18 +182,24 @@ export default function CalendarClient({ bookings, blockedTimes, services, year,
       )}
 
       {view === 'list' && (
-        <div className="space-y-2">
+        <div className="space-y-3">
           {bookings.length === 0 ? (
-            <div className="text-center py-16 text-muted">אין הזמנות בחודש זה</div>
+            <div className="flex flex-col items-center justify-center py-16 bg-card/50 border-2 border-dashed border-white/5 rounded-3xl">
+              <div className="w-16 h-16 bg-white/5 flex items-center justify-center rounded-full mb-4">
+                <span className="text-3xl">📅</span>
+              </div>
+              <h3 className="text-lg font-medium text-primary-text mb-1">אין אירועים ביומן</h3>
+              <p className="text-sm text-muted">לא נמצאו הזמנות לחודש זה.</p>
+            </div>
           ) : (
             bookings.map(b => (
               <button
                 key={b.id}
                 onClick={() => setSelectedBooking(b)}
-                className="w-full bg-card border border-white/10 rounded-xl p-4 text-right hover:border-white/20 transition-colors"
+                className="w-full bg-card/80 backdrop-blur-sm border border-white/5 shadow-sm hover:shadow-md hover:-translate-y-0.5 rounded-2xl p-4 text-right hover:border-accent/30 transition-all duration-300"
               >
                 <div className="flex justify-between items-start">
-                  <span className={`text-xs px-2 py-0.5 rounded-full ${b.status === 'confirmed' ? 'bg-green-500/20 text-green-400' : 'bg-yellow-500/20 text-yellow-400'}`}>
+                  <span className={`text-xs px-2.5 py-0.5 font-medium rounded-full border ${b.status === 'confirmed' ? 'bg-green-500/10 text-green-400 border-green-500/20' : 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20'}`}>
                     {b.status === 'confirmed' ? 'מאושר' : 'ממתין'}
                   </span>
                   <div>
@@ -211,11 +217,11 @@ export default function CalendarClient({ bookings, blockedTimes, services, year,
       {/* Modal */}
       {selectedBooking && (
         <div
-          className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4"
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200"
           onClick={() => setSelectedBooking(null)}
         >
           <div
-            className="bg-card border border-white/10 rounded-2xl p-6 max-w-sm w-full"
+            className="bg-card border border-white/10 rounded-2xl p-6 max-w-sm w-full shadow-2xl animate-in zoom-in-95 duration-200"
             onClick={e => e.stopPropagation()}
             dir="rtl"
           >

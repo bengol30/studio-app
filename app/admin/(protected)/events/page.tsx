@@ -247,16 +247,21 @@ export default async function EventsPage({
 
       {/* Events list */}
       {events.length === 0 ? (
-        <div className="text-center py-16 text-muted">
-          <p className="text-4xl mb-3">🎵</p>
-          <p>אין אירועים בסטטוס זה</p>
+        <div className="flex flex-col items-center justify-center py-20 bg-card/50 border-2 border-dashed border-white/5 rounded-3xl mt-6">
+          <div className="w-20 h-20 bg-white/5 flex items-center justify-center rounded-full mb-4">
+            <span className="text-4xl">🎵</span>
+          </div>
+          <h3 className="text-lg font-medium text-primary-text mb-1">אין כאן אירועים כרגע</h3>
+          <p className="text-sm text-muted text-center max-w-sm">
+            ניתן ללחוץ על "אירוע חדש" כדי לפתוח סשן ולשתף אותו עם הלקוחות.
+          </p>
         </div>
       ) : (
         <div className="space-y-3">
           {events.map(event => (
             <div
               key={event.id}
-              className={`bg-card rounded-xl border p-5 transition-colors ${editEventId === event.id ? 'border-accent/30' : 'border-white/10'
+              className={`bg-card/80 backdrop-blur-sm rounded-2xl border p-5 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 ${editEventId === event.id ? 'border-accent/40 bg-accent/5' : 'border-white/5 hover:border-accent/30'
                 }`}
             >
               <div className="flex flex-col-reverse sm:flex-row justify-between items-start sm:items-center mb-3 min-h-10">
@@ -308,25 +313,25 @@ export default async function EventsPage({
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-2 text-sm">
-                <div className="bg-primary rounded-lg px-3 py-2">
-                  <span className="text-muted">תאריך: </span>
-                  <span className="text-primary-text">{formatDate(event.event_date)}</span>
+              <div className="grid grid-cols-2 gap-3 mt-4 text-sm">
+                <div className="flex items-center gap-2 bg-primary/50 backdrop-blur rounded-xl px-3 py-2.5 border border-white/5">
+                  <span className="text-muted text-lg">🗓️</span>
+                  <span className="text-primary-text font-medium">{formatDate(event.event_date)}</span>
                 </div>
-                <div className="bg-primary rounded-lg px-3 py-2">
-                  <span className="text-muted">שעה: </span>
-                  <span className="text-primary-text">{event.event_time?.slice(0, 5)}</span>
+                <div className="flex items-center gap-2 bg-primary/50 backdrop-blur rounded-xl px-3 py-2.5 border border-white/5">
+                  <span className="text-muted text-lg">⏰</span>
+                  <span className="text-primary-text font-medium" dir="ltr">{event.event_time?.slice(0, 5)}</span>
                 </div>
                 {event.location && (
-                  <div className="bg-primary rounded-lg px-3 py-2">
-                    <span className="text-muted">מיקום: </span>
-                    <span className="text-primary-text">{event.location}</span>
+                  <div className="flex items-center gap-2 bg-primary/50 backdrop-blur rounded-xl px-3 py-2.5 border border-white/5">
+                    <span className="text-muted text-lg">📍</span>
+                    <span className="text-primary-text font-medium truncate" title={event.location}>{event.location}</span>
                   </div>
                 )}
-                <div className="bg-primary rounded-lg px-3 py-2">
-                  <span className="text-muted">מחיר: </span>
-                  <span className="text-primary-text">
-                    {event.price === 0 ? 'חינם' : `₪${event.price}`}
+                <div className="flex items-center gap-2 bg-primary/50 backdrop-blur rounded-xl px-3 py-2.5 border border-white/5">
+                  <span className="text-muted text-lg">₪</span>
+                  <span className="text-primary-text font-medium">
+                    {event.price === 0 ? 'חינם' : event.price}
                   </span>
                 </div>
               </div>
