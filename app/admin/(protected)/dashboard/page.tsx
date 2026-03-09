@@ -131,7 +131,7 @@ export default async function DashboardPage() {
   ];
 
   return (
-    <div className="p-8" dir="rtl">
+    <div className="p-4 md:p-8" dir="rtl">
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-primary-text">שלום 👋</h1>
         <p className="text-muted mt-1">{user?.email}</p>

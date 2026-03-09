@@ -94,11 +94,11 @@ export default function AdminBookingsList({ bookings, activeStatus }: Props) {
         <div>
             {/* Bulk Actions Bar */}
             {hasSelection && (
-                <div className="bg-card border border-accent/30 rounded-xl p-4 mb-4 flex items-center justify-between sticky top-4 z-10 shadow-lg">
+                <div className="bg-card border border-accent/30 rounded-xl p-4 mb-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 sticky top-4 z-10 shadow-lg">
                     <span className="text-sm font-medium text-primary-text">
                         {selectedIds.size} מסומנים
                     </span>
-                    <div className="flex gap-2">
+                    <div className="flex flex-wrap gap-2 w-full md:w-auto">
                         {activeStatus === 'pending' && (
                             <>
                                 <button
@@ -195,8 +195,8 @@ export default function AdminBookingsList({ bookings, activeStatus }: Props) {
                             />
                         </div>
                         <div className="flex-1">
-                            <div className="flex justify-between items-start mb-3">
-                                <div className="flex gap-2">
+                            <div className="flex flex-col-reverse sm:flex-row justify-between items-start sm:items-center mb-3">
+                                <div className="flex flex-wrap gap-2 mt-2 sm:mt-0">
                                     {activeStatus === 'pending' && !hasSelection && (
                                         <>
                                             <button
@@ -222,7 +222,7 @@ export default function AdminBookingsList({ bookings, activeStatus }: Props) {
                                         </button>
                                     )}
                                 </div>
-                                <div className="text-right">
+                                <div className="text-right w-full sm:w-auto">
                                     <p className="font-semibold text-primary-text">{booking.client_name}</p>
                                     <p className="text-sm text-muted">{booking.client_phone}</p>
                                 </div>
